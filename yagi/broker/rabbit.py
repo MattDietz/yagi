@@ -1,8 +1,10 @@
 import carrot.connection
 import carrot.messaging
 
+from yagi import config as conf
+
 class Broker(object):
-    def __init__(self, conf):
+    def __init__(self):
         self.conn = carrot.connection.BrokerConnection(
                 hostname=conf.get('rabbit_broker', 'event_host'),
                 port=5672,

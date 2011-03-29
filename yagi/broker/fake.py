@@ -1,5 +1,5 @@
 class Broker(object):
-    def __init__(self, conf):
+    def __init__(self):
         pass
 
     def register_callback(self, fun):
