@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+import os                             
+import sys
+
+import daemon
+
+possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
+                                   os.pardir,
+                                   os.pardir))
+if os.path.exists(os.path.join(possible_topdir, 'yagi', '__init__.py')):
+    sys.path.insert(0, possible_topdir)
+
+import yagi.config
+import yagi.feed.feed
+import yagi.log
+
+LOG = yagi.log.logger
+
+if __name__ == '__main__':
+    yagi.log.setup_logging()
+    LOG.debug('Initializing yagi feed...')
+    if yagi.config.get('event_feed', 'daemonize') == 'True':
+        context = daemon.DaemonContext()
+        LOG.debug('Starting daemon')
+        context.pidfile = yagi.config.get('event_worker', 'pidfile')
+        context.open()
+    yagi.feed.feed.start()
