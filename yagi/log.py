@@ -4,6 +4,7 @@ import yagi.config
 
 logger = logging
 
+
 class YagiLogger(logging.Logger):
     def __init__(self, name, level=None):
         conf = yagi.config.parse_conf()
@@ -13,14 +14,13 @@ class YagiLogger(logging.Logger):
         logfile = conf.get('logging', 'logfile')
         if logfile:
             handlers.append(logging.FileHandler(
-                    filename=logfile
-                    ))
+                            filename=logfile))
         for handler in handlers:
-            logging.Logger.addHandler(self, handler) 
+            logging.Logger.addHandler(self, handler)
+
 
 def setup_logging():
-    logging.root = YagiLogger("YagiLogger") 
-    
+    logging.root = YagiLogger("YagiLogger")
+
 
 logging.setLoggerClass(YagiLogger)
-

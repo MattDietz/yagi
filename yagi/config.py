@@ -1,8 +1,14 @@
 import ConfigParser
 
-DEFAULT_CONF_PATH='yagi.conf'
+import yagi.log
+
+LOG = yagi.log.logger
+
+DEFAULT_CONF_PATH = 'yagi.conf'
 
 config = None
+argv = None
+
 
 def parse_conf(conf_path=None):
     if not conf_path:
@@ -11,13 +17,21 @@ def parse_conf(conf_path=None):
     config.read(conf_path)
     return config
 
+
 def get(*args, **kwargs):
     global config
     if not config:
         config = parse_conf()
-
     try:
         var = config.get(*args)
-        return var
     except Exception, e:
+        LOG.warn(e)
         return kwargs.get('default', None)
+    return var
+
+
+def setup(sys_argv):
+    global argv
+    global config
+    argv = sys_argv
+    config = parse_conf()
