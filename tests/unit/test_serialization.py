@@ -18,7 +18,6 @@ class SerializerTests(unittest.TestCase):
         def config_get(*args, **kwargs):
             return 'yagi.serializer.atom'
 
-        yagi.config.get()
         self.stubs.Set(yagi.config, 'get', config_get)
 
         ser = yagi.serializer.feed_serializer() 

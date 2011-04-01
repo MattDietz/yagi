@@ -24,6 +24,7 @@ class EventFeed(object):
     def route_request(self, req):
         path = req.environ['PATH_INFO'][1:].split('/')
         resource = path[0]
+        path = filter(lambda x: len(x) > 0, path)
         if len(path) > 2:
             raise Exception("Invalid resource")
         if len(path) == 2:
