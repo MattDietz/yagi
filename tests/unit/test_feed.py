@@ -26,7 +26,7 @@ class FeedTests(unittest.TestCase):
         self.stubs.Set(yagi.feed.feed.EventFeed, 'get_one', mock_get_one)
         feed = yagi.feed.feed.EventFeed()
         req = webob.Request.blank('/dummy/0')
-        feed.route_request(req)
+        req.get_response(feed.route_request)
         self.assertEqual(self.called, True)
 
     def test_get_all(self):
@@ -36,7 +36,7 @@ class FeedTests(unittest.TestCase):
         self.stubs.Set(yagi.feed.feed.EventFeed, 'get_all', mock_get_all)
         feed = yagi.feed.feed.EventFeed()
         req = webob.Request.blank('/')
-        feed.route_request(req)
+        req.get_response(feed.route_request)
         self.assertEqual(self.called, True)
 
     def test_get_all_of_resource(self):
@@ -50,7 +50,7 @@ class FeedTests(unittest.TestCase):
                 mock_get)
         feed = yagi.feed.feed.EventFeed()
         req = webob.Request.blank('/instance')
-        feed.route_request(req)
+        req.get_response(feed.route_request)
         self.assertEqual(self.called, True)
 
     def test_get_all_of_resource_2(self):
@@ -65,5 +65,5 @@ class FeedTests(unittest.TestCase):
         feed = yagi.feed.feed.EventFeed()
         # Trailing slash
         req = webob.Request.blank('/instance/')
-        feed.route_request(req)
+        req.get_response(feed.route_request)
         self.assertEqual(self.called, True)
