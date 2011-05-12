@@ -23,8 +23,8 @@ class EventWorker(object):
     def fetched_message(self, message_json, message):
         LOG.debug('Received %s' % (message_json))
         try:
-            self.persist_event(message_json)
-            yagi.notifier.notify(yagi.utils.topic_url(obj['key']))
+            event_type = self.persist_event(message_json)
+            yagi.notifier.notify(yagi.utils.topic_url(event_type))
         except Exception, e:
             LOG.debug(e)
         finally:
@@ -44,17 +44,15 @@ class EventWorker(object):
         payload - A python dictionary of attributes
         """
         msg = json.loads(message_json)
-        try:
-            for key in event_attributes:
-                if not key in msg:
-                    raise BadMessageFormatException(
-                        "Invalid Message Format, missing key %s" % key)
-            event_type = msg['event_type']
+        for key in event_attributes:
+            if not key in msg:
+                raise BadMessageFormatException(
+                    "Invalid Message Format, missing key %s" % key)
+        event_type = msg['event_type']
 
-            self.db.create(event_type, msg)
-        except Exception, e:
-            LOG.error('Invalid message format'
+        self.db.create(event_type, msg)
         LOG.debug('New notification created')
+        return event_type
 
     def start(self):
         LOG.debug('Starting eventworker...')
