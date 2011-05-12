@@ -18,8 +18,10 @@ class Broker(object):
         self.consumer = carrot.messaging.Consumer(
                 connection=self.conn,
                 exchange=conf.get('rabbit_broker', 'exchange'),
+                exchange_type='topic',
                 routing_key=conf.get('rabbit_broker', 'routing_key'),
-                queue=conf.get('rabbit_broker', 'event_topic'))
+                queue=conf.get('rabbit_broker', 'event_topic'),
+                durable=False)
 
     def register_callback(self, fun):
         self.consumer.register_callback(fun)
