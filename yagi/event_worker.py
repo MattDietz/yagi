@@ -16,7 +16,7 @@ class EventWorker(object):
         self.db = yagi.persistence.persistence_driver()
 
     def fetched_message(self, message_data, message):
-        LOG.debug('Received %s' % (message_data))
+        LOG.debug('Received %s %s' % (message_data, message))
         try:
             obj = json.loads(message_data)
             self.db.create(obj['key'], json.dumps(obj['content']))
