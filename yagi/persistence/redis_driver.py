@@ -33,6 +33,6 @@ class Driver(yagi.persistence.Driver):
                 yield key, e
         return self._format(generator)
 
-    def _format(self, gen):
+    def _format(self, gen): 
         return [{'id': element[0], 'content': element[1], 'klass': key}
                 for key, element in gen()]
