@@ -21,7 +21,7 @@ class Broker(object):
                 exchange_type='topic',
                 routing_key=conf.get('rabbit_broker', 'routing_key'),
                 queue=conf.get('rabbit_broker', 'event_topic'),
-                durable=False)
+                durable=conf.get_bool('rabbit_broker', 'durable'))
 
     def register_callback(self, fun):
         self.consumer.register_callback(fun)

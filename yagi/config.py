@@ -29,6 +29,18 @@ def get(*args, **kwargs):
         return kwargs.get('default', None)
     return var
 
+def get_bool(*args, **kwargs):
+    global config
+    if not config:
+        config = parse_conf()
+    try:
+        var = config.get(*args)
+        if var.lower() == 'true':
+            return True
+        return False
+    except Exception, e:
+        LOG.warn(e)
+        return kwargs.get('default', None)
 
 def setup(sys_argv):
     global argv

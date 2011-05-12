@@ -29,7 +29,7 @@ class EventWorker(object):
             LOG.debug(e)
         finally:
             message.ack()
-    
+
     def persist_event(self, message_json):
         """Stores an incoming event in the database
 
@@ -50,7 +50,7 @@ class EventWorker(object):
                     raise BadMessageFormatException(
                         "Invalid Message Format, missing key %s" % key)
             event_type = msg['event_type']
-            
+
             self.db.create(event_type, msg)
         except Exception, e:
             LOG.error('Invalid message format'
