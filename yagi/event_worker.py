@@ -8,11 +8,13 @@ import yagi.utils
 
 LOG = yagi.log.logger
 
+
 class BadMessageFormatException(Exception):
     pass
 
 event_attributes = ['message_id', 'publisher_id', 'event_type', 'priority',
                     'payload', 'timestamp']
+
 
 class EventWorker(object):
     def __init__(self):

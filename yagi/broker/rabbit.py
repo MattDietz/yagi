@@ -9,18 +9,19 @@ LOG = yagi.log.logger
 
 class Broker(object):
     def __init__(self):
+        config = conf.config_with('rabbit_broker')
         self.conn = carrot.connection.BrokerConnection(
-                hostname=conf.get('rabbit_broker', 'host'),
+                hostname=config('host'),
                 port=5672,
-                userid=conf.get('rabbit_broker', 'user'),
-                password=conf.get('rabbit_broker', 'password'),
-                virtual_host=conf.get('rabbit_broker', 'vhost'))
+                userid=config('user'),
+                password=config('password'),
+                virtual_host=config('vhost'))
         self.consumer = carrot.messaging.Consumer(
                 connection=self.conn,
-                exchange=conf.get('rabbit_broker', 'exchange'),
-                exchange_type='topic',
-                routing_key=conf.get('rabbit_broker', 'routing_key'),
-                queue=conf.get('rabbit_broker', 'event_topic'),
+                exchange=config('exchange'),
+                exchange_type=config('exchange_type'),
+                routing_key=config('routing_key'),
+                queue=config('event_topic'),
                 durable=conf.get_bool('rabbit_broker', 'durable'))
 
     def register_callback(self, fun):

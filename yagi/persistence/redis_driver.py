@@ -6,9 +6,10 @@ import yagi.persistence
 
 class Driver(yagi.persistence.Driver):
     def __init__(self):
-        host = yagi.config.get('persistence', 'host')
-        port = yagi.config.get('persistence', 'port', default=6379)
-        password = yagi.config.get('persistence', 'password')
+        conf = yagi.config.config_with('persistence')
+        host = conf('host')
+        port = conf('port', default=6379)
+        password = conf('password')
         self.client = redis.Redis(host=host, password=password, port=port)
         super(yagi.persistence.Driver, self).__init__()
 
@@ -33,6 +34,6 @@ class Driver(yagi.persistence.Driver):
                 yield key, e
         return self._format(generator)
 
-    def _format(self, gen): 
+    def _format(self, gen):
         return [{'id': element[0], 'content': element[1], 'klass': key}
                 for key, element in gen()]
