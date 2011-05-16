@@ -13,6 +13,7 @@ config = None
 
 
 def parse_conf():
+    config = None
     for path in CONFIG_PATHS:
         path = path + CONFIG_FILE
         if os.path.exists(path):
