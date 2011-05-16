@@ -13,14 +13,14 @@ class Driver(yagi.persistence.Driver):
         self.client = redis.Redis(host=host, password=password, port=port)
         super(yagi.persistence.Driver, self).__init__()
 
-    def create(self, key, value):
-        self.client.rpush(key, value)
+    def create(self, key, entity_uuid, value):
+        self.client.hset(key, entity_uuid, value)
 
-    def get(self, key, entity_id):
+    def get(self, key, entity_uuid):
         def generator():
-            element = (entity_id, self.client.lindex(key, entity_id))
-            yield key, element
-        return self._format(generator)
+            element = self.client.hget(key, entity_uuid)
+            yield entity_uuid, element
+        return self._format(key, generator)
 
     def get_all(self):
         keys = self.client.keys()
@@ -28,12 +28,11 @@ class Driver(yagi.persistence.Driver):
 
     def get_all_of_type(self, key):
         def generator():
-            count = self.client.llen(key)
-            elements = enumerate(self.client.lrange(key, 0, count))
-            for e in elements:
-                yield key, e
-        return self._format(generator)
+            elements = self.client.hgetall(key)
+            for k,v in elements.iteritems():
+                yield k, v
+        return self._format(key, generator)
 
-    def _format(self, gen):
-        return [{'id': element[0], 'content': element[1], 'klass': key}
-                for key, element in gen()]
+    def _format(self, key, gen):
+        return [{'id': uuid, 'content': element, 'event_type': key}
+                 for uuid, element in gen()]
