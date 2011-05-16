@@ -13,9 +13,10 @@ def _entity_link(entity_id):
 
 
 def _entity_url():
-    feed_host = yagi.config.get('event_feed', 'feed_host')
-    scheme = "%s://" % (yagi.config.get('event_feed', 'use_https') or 'http')
-    port = yagi.config.get('event_feed', 'port') or ''
+    conf = yagi.config.config_with('event_feed')
+    feed_host = conf('feed_host')
+    scheme = "%s://" % (conf('use_https') or 'http')
+    port = conf('port') or ''
     if len(port) > 0:
         port = ':%s' % port
 
