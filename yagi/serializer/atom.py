@@ -8,8 +8,8 @@ import yagi.config
 import yagi.utils
 
 
-def _entity_link(entity_id):
-    return unicode(''.join([_entity_url(), 'event/', str(entity_id)]))
+def _entity_link(entity_id, key):
+    return unicode(''.join([_entity_url(), '%s/' % key, str(entity_id)]))
 
 
 def _entity_url():
@@ -29,7 +29,7 @@ def write_items(self, handler):
     for item in self.items:
         handler.startElement(u"entry", self.item_attributes(item))
         self.add_item_elements(handler, item)
-        handler.addQuickElement(u"content", item['payload'],
+        handler.addQuickElement(u"content", item['contents'],
                 dict(type='application/json'))
         handler.endElement(u"entry")
 
@@ -49,8 +49,8 @@ def dumps(entities):
         language=u'en')
     for entity in entities:
         feed.add_item(
-            title=unicode(entity['klass']),
-            link=_entity_link(entity['id']),
-            description=unicode(entity['klass']),
+            title=unicode(entity['event_type']),
+            link=_entity_link(entity['id'], entity['event_type']),
+            description=unicode(entity['event_type']),
             contents=entity['content'])
     return feed.writeString('utf-8')

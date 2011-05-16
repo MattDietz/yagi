@@ -50,11 +50,10 @@ class EventWorker(object):
             if not key in msg:
                 raise BadMessageFormatException(
                     "Invalid Message Format, missing key %s" % key)
-        event_type = msg['event_type']
 
-        self.db.create(event_type, msg)
+        self.db.create(msg['event_type'], msg['message_id'], message_json)
         LOG.debug('New notification created')
-        return event_type
+        return msg['event_type']
 
     def start(self):
         LOG.debug('Starting eventworker...')

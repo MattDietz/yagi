@@ -27,8 +27,7 @@ class Broker(object):
                 line = self.pipe.readline()
                 if len(line) > 0:
                     LOG.debug('Got %s' % line)
-                    line = json.loads(line)
                     message = Message()
-                    self.callback(line['msg'], message)
+                    self.callback(line, message)
             except Exception, e:
                 LOG.debug(e)
