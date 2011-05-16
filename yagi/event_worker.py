@@ -20,17 +20,17 @@ class EventWorker(object):
                 'event_driver'))()
         self.db = yagi.persistence.persistence_driver()
 
-    def fetched_message(self, message_json, message):
-        LOG.debug('Received %s' % (message_json))
+    def fetched_message(self, message_body, message):
+        LOG.debug('Received %s' % (message_body))
         try:
-            event_type = self.persist_event(message_json)
+            event_type = self.persist_event(message_body)
             yagi.notifier.notify(yagi.utils.topic_url(event_type))
         except Exception, e:
-            LOG.debug(e)
+            LOG.debug('Error processing event body', exc_info=True)
         finally:
             message.ack()
 
-    def persist_event(self, message_json):
+    def persist_event(self, message_body):
         """Stores an incoming event in the database
 
         Messages have the following expected attributes:
@@ -43,14 +43,13 @@ class EventWorker(object):
                    the set (DEBUG, WARN, INFO, ERROR, CRITICAL)
         payload - A python dictionary of attributes
         """
-        msg = json.loads(message_json)
         for key in event_attributes:
-            if not key in msg:
+            if not key in message_body:
                 raise BadMessageFormatException(
                     "Invalid Message Format, missing key %s" % key)
-        event_type = msg['event_type']
+        event_type = message_body['event_type']
 
-        self.db.create(event_type, msg)
+        self.db.create(event_type, message_body)
         LOG.debug('New notification created')
         return event_type
 
