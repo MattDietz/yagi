@@ -34,10 +34,9 @@ class EventFeed(object):
             return self.get_all_of_resource(req, resource)
         return self.get_all(req)
 
-    def get_one(self, req, resource, index):
-        LOG.debug('get_one %s %s' % (resource, index))
-        elements = self.db_driver.get(resource, index)
-        print elements
+    def get_one(self, req, resource, uuid):
+        LOG.debug('get_one %s %s' % (resource, uuid))
+        elements = self.db_driver.get(resource, uuid)
         return self.respond(req, elements)
 
     def get_all_of_resource(self, req, resource):
@@ -52,7 +51,6 @@ class EventFeed(object):
 
     def respond(self, req, elements):
         LOG.debug('serializing feed of %d events' % len(elements))
-        print elements
         response = webob.Response()
         response.content_type = 'application/atom+xml'
         response.body = self.feed_serializer.dumps(elements)

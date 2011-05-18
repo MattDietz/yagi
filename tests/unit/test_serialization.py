@@ -5,6 +5,7 @@ import stubout
 import yagi.config
 import yagi.serializer
 
+
 class SerializerTests(unittest.TestCase):
     def setUp(self):
         self.stubs = stubout.StubOutForTesting()
@@ -20,5 +21,5 @@ class SerializerTests(unittest.TestCase):
 
         self.stubs.Set(yagi.config, 'get', config_get)
 
-        ser = yagi.serializer.feed_serializer() 
+        ser = yagi.serializer.feed_serializer()
         self.assertEqual(ser, yagi.serializer.atom)

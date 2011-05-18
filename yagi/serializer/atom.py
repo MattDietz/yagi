@@ -8,14 +8,15 @@ import yagi.config
 import yagi.utils
 
 
-def _entity_link(entity_id):
-    return unicode(''.join([_entity_url(), 'event/', str(entity_id)]))
+def _entity_link(entity_id, key):
+    return unicode(''.join([_entity_url(), '%s/' % key, str(entity_id)]))
 
 
 def _entity_url():
-    feed_host = yagi.config.get('event_feed', 'feed_host')
-    scheme = "%s://" % (yagi.config.get('event_feed', 'use_https') or 'http')
-    port = yagi.config.get('event_feed', 'port') or ''
+    conf = yagi.config.config_with('event_feed')
+    feed_host = conf('feed_host')
+    scheme = "%s://" % (conf('use_https') or 'http')
+    port = conf('port') or ''
     if len(port) > 0:
         port = ':%s' % port
 
@@ -48,8 +49,8 @@ def dumps(entities):
         language=u'en')
     for entity in entities:
         feed.add_item(
-            title=unicode(entity['klass']),
-            link=_entity_link(entity['id']),
-            description=unicode(entity['klass']),
+            title=unicode(entity['event_type']),
+            link=_entity_link(entity['id'], entity['event_type']),
+            description=unicode(entity['event_type']),
             contents=entity['content'])
     return feed.writeString('utf-8')

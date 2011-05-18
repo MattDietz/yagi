@@ -1,37 +1,56 @@
 import ConfigParser
+import functools
+import os
 
 import yagi.log
 
 LOG = yagi.log.logger
 
-DEFAULT_CONF_PATH = 'yagi.conf'
+CONFIG_FILE = 'yagi.conf'
+CONFIG_PATHS = ['./', '/etc/']
 
 config = None
-argv = None
 
 
-def parse_conf(conf_path=None):
-    if not conf_path:
-        conf_path = DEFAULT_CONF_PATH
-    config = ConfigParser.ConfigParser()
-    config.read(conf_path)
+def parse_conf():
+    config = None
+    for path in CONFIG_PATHS:
+        path = path + CONFIG_FILE
+        if os.path.exists(path):
+            config = ConfigParser.ConfigParser()
+            config.read(path)
+            break
     return config
 
 
+def lazy_load_config():
+    def decorate(f):
+        global config
+        if not config:
+            config = parse_conf()
+
+        def returns_default(*args, **kwargs):
+            try:
+                return f(*args)
+            except ConfigParser.NoOptionError, e:
+                LOG.warn(e)
+                return kwargs.get('default', None)
+        return returns_default
+    return decorate
+
+
+@lazy_load_config()
 def get(*args, **kwargs):
-    global config
-    if not config:
-        config = parse_conf()
-    try:
-        var = config.get(*args)
-    except Exception, e:
-        LOG.warn(e)
-        return kwargs.get('default', None)
-    return var
+    return config.get(*args)
 
 
-def setup(sys_argv):
-    global argv
-    global config
-    argv = sys_argv
-    config = parse_conf()
+@lazy_load_config()
+def get_bool(*args, **kwargs):
+    var = config.get(*args)
+    if var.lower() == 'true':
+        return True
+    return False
+
+
+def config_with(*args):
+    return functools.partial(get, *args)
