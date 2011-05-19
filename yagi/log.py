@@ -7,11 +7,10 @@ logger = logging
 
 class YagiLogger(logging.Logger):
     def __init__(self, name, level=None):
-        conf = yagi.config.parse_conf()
         logging.Logger.__init__(self, name, logging.DEBUG)
         handlers = []
         handlers.append(logging.StreamHandler())
-        logfile = conf.get('logging', 'logfile')
+        logfile = yagi.config.get('logging', 'logfile')
         if logfile:
             handlers.append(logging.FileHandler(
                             filename=logfile))
@@ -21,6 +20,4 @@ class YagiLogger(logging.Logger):
 
 def setup_logging():
     logging.root = YagiLogger("YagiLogger")
-
-
-logging.setLoggerClass(YagiLogger)
+    logging.setLoggerClass(YagiLogger)

@@ -1,6 +1,7 @@
 import ConfigParser
 import functools
 import os
+import sys
 
 import yagi.log
 
@@ -10,41 +11,48 @@ CONFIG_FILE = 'yagi.conf'
 CONFIG_PATHS = ['./', '/etc/']
 
 config = None
+config_path = None
 
+def setup(**kwargs):
+    if kwargs['config_path']:
+        parse_conf(kwargs['config_path'])
 
-def parse_conf():
-    config = None
-    for path in CONFIG_PATHS:
-        path = path + CONFIG_FILE
-        if os.path.exists(path):
-            config = ConfigParser.ConfigParser()
-            config.read(path)
-            break
+def parse_conf(path=None):
+    global config, config_path
+    config_path = path
+    config = ConfigParser.ConfigParser()
+    if not config_path:
+        for path in CONFIG_PATHS:
+            path = path + CONFIG_FILE
+            if os.path.exists(path):
+                config_path = path
+                break
+    else:
+        if not os.path.exists(path):
+            raise Exception, "No configuration '%s' found" % path
+    config.read(config_path)
     return config
 
 
-def lazy_load_config():
-    def decorate(f):
+def lazy_load_config(fun):
+    def decorate(*args, **kwargs):
         global config
         if not config:
             config = parse_conf()
-
-        def returns_default(*args, **kwargs):
-            try:
-                return f(*args)
-            except ConfigParser.NoOptionError, e:
-                LOG.warn(e)
-                return kwargs.get('default', None)
-        return returns_default
+        try:
+            return fun(*args, **kwargs)
+        except ConfigParser.NoOptionError, e:
+            LOG.warn(e)
+            return kwargs.get('default', None)
     return decorate
 
 
-@lazy_load_config()
+@lazy_load_config
 def get(*args, **kwargs):
     return config.get(*args)
 
 
-@lazy_load_config()
+@lazy_load_config
 def get_bool(*args, **kwargs):
     var = config.get(*args)
     if var.lower() == 'true':
