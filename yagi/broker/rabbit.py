@@ -5,6 +5,19 @@ import time
 from yagi import config as conf
 import yagi.log
 
+with conf.defaults_for('rabbit_broker') as default:
+    default('host', 'localhost')
+    default('user', 'guest')
+    default('password', 'guest')
+    default('port', 5672)
+    default('vhost', '/')
+    default('event_topic', 'notifications')
+    default('exchange', 'nova')
+    default('exchange_type', 'topic')
+    default('routing_key',  'notifications')
+    default('durable', False)
+    default('poll_delay', 1)
+
 LOG = yagi.log.logger
 
 WARN = 'WARN'
@@ -19,6 +32,7 @@ queue_chunks = {CRITICAL: 2**16,
                 INFO: 50,
                 WARN: 25,
                 DEBUG: 10}
+
 
 class Broker(object):
     def __init__(self):

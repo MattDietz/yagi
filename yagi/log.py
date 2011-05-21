@@ -4,6 +4,11 @@ import yagi.config
 
 logger = logging
 
+with yagi.config.defaults_for('logging') as default:
+    default('logfile', 'yagi.log')
+    default('default_level', 'DEBUG')
+    default('logger', 'logging')
+
 
 class YagiLogger(logging.Logger):
     def __init__(self, name, level=None):

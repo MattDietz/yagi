@@ -3,6 +3,10 @@ import redis
 import yagi.config
 import yagi.persistence
 
+with yagi.config.defaults_for('persistence') as default:
+    default('host', 'localhost')
+    default('port', 6379)
+    default('password', '')
 
 class Driver(yagi.persistence.Driver):
     def __init__(self):
