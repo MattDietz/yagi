@@ -1,8 +1,10 @@
 import json
+import multiprocessing
+import time
 
 import yagi.config
 import yagi.log
-import yagi.notifier
+import yagi.notifier.api
 import yagi.persistence
 import yagi.utils
 
@@ -12,7 +14,6 @@ with yagi.config.defaults_for('event_worker') as default:
     default('pidfile', 'yagi_event_worker.pid')
     default('daemonize', 'False')
     default('event_driver','yagi.broker.rabbit.Broker')
-    #default('event_driver','yagi.broker.fake.Broker')
 
 class BadMessageFormatException(Exception):
     pass
@@ -26,18 +27,17 @@ class EventWorker(object):
         self.broker = yagi.utils.import_class(yagi.config.get('event_worker',
                 'event_driver'))()
         self.db = yagi.persistence.persistence_driver()
+        self.processes = []
 
-    def fetched_message(self, message_body, message):
-        LOG.debug('Received %s' % (message_body))
-        try:
-            event_type = self.persist_event(message_body)
-            yagi.notifier.notify(yagi.utils.topic_url(event_type))
-        except Exception, e:
-            LOG.debug('Error processing event body', exc_info=True)
-        finally:
-            message.ack()
+    def fetched_message(self, messages):
+        for message in messages:
+            try:
+                event_type = self.persist_event(message.payload)
+            except Exception, e:
+                LOG.debug('Error processing event body', exc_info=True)
+        yagi.notifier.api.notify(messages)
 
-    def persist_event(self, message_body):
+    def persist_event(self, message_json):
         """Stores an incoming event in the database
 
         Messages have the following expected attributes:
@@ -50,6 +50,8 @@ class EventWorker(object):
                    the set (DEBUG, WARN, INFO, ERROR, CRITICAL)
         payload - A python dictionary of attributes
         """
+
+        message_body = json.loads(message_json)
         for key in event_attributes:
             if not key in message_body:
                 raise BadMessageFormatException(
@@ -60,12 +62,28 @@ class EventWorker(object):
         LOG.debug('New notification created')
         return event_type
 
+    def notifier(self):
+        while True:
+            time.sleep(2)
+        
     def start(self):
         LOG.debug('Starting eventworker...')
         self.broker.register_callback(self.fetched_message)
-        self.broker.loop()
+        self.processes.append(multiprocessing.Process(
+                target=self.broker.loop))
+        #self.processes.append(multiprocessing.Process(target=self.notifier))
+        for proc in self.processes:
+            proc.start()
+
+    def wait_for_finish(self):
+        for proc in self.processes:
+            try:
+                proc.join()
+            except Exception, e:
+                pass
 
 
 def start():
     event_worker = EventWorker()
     event_worker.start()
+    event_worker.wait_for_finish()

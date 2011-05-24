@@ -7,9 +7,12 @@ LOG = yagi.log.logger
 
 
 class Message(object):
+    def __init__(self, message):
+        self.payload = message
+
     def ack(self):
         pass
-
+    
 
 class Broker(object):
     """A flimsy class for testing the event worker"""
@@ -27,7 +30,7 @@ class Broker(object):
                 line = self.pipe.readline()
                 if len(line) > 0:
                     LOG.debug('Got %s' % line)
-                    message = Message()
-                    self.callback(line, message)
+                    message = Message(line)
+                    self.callback([message])
             except Exception, e:
                 LOG.debug(e)

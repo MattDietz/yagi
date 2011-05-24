@@ -21,15 +21,6 @@ def import_module(mod_str):
         raise Exception("Could not load module %s" % mod_str)
 
 
-def topic_url(key):
-    host = yagi.config.get('event_feed', 'host') or '127.0.0.1'
-    port = yagi.config.get('event_feed', 'port', default=80)
-    scheme = yagi.config.get('event_feed', 'use_https') == True
-    if not scheme:
-        scheme = 'http'
-    return '%s://%s:%s/%s' % (scheme, host, port, key)
-
-
 def get_ip_addr():
     """Try to get a default. Override if this isn't your default NIC"""
 

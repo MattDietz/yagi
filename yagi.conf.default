@@ -8,6 +8,9 @@ daemonize = False
 #event_driver = yagi.broker.rabbit.Broker
 event_driver = yagi.broker.fake.Broker
 
+[notifier]
+notifications_driver = yagi.notifier.pubsubhubhub
+
 [rabbit_broker]
 host = localhost
 user = guest
@@ -33,7 +36,7 @@ logfile = yagi.log
 default_level = DEBUG
 
 [persistence]
-driver = yagi.persistence.redis_driver.Driver
+driver = yagi.persistence.devnull.Driver
 host = localhost
 
 [hub]
