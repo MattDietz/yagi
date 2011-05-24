@@ -21,7 +21,8 @@ LOG = yagi.log.logger
 if __name__ == '__main__':
     args = yagi.commandline.parse_args('Yagi Event Worker')
     if args.config:
-        yagi.config.setup(config_path=args.config)yagi.log.setup_logging()
+        yagi.config.setup(config_path=args.config)
+        yagi.log.setup_logging()
     LOG.debug('Initializing yagi feed...')
     if yagi.config.get('event_feed', 'daemonize') == 'True':
         context = daemon.DaemonContext()

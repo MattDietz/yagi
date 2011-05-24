@@ -1,6 +1,8 @@
+import json
+import time
+
 import carrot.connection
 import carrot.messaging
-import time
 
 from yagi import config as conf
 import yagi.log
@@ -36,6 +38,7 @@ queue_chunks = {CRITICAL: 2**16,
 
 class Broker(object):
     def __init__(self):
+        self.callbacks = []
         config = conf.config_with('rabbit_broker')
         self.conn = carrot.connection.BrokerConnection(
                 hostname=config('host'),
@@ -57,22 +60,31 @@ class Broker(object):
                 durable=conf.get_bool('rabbit_broker', 'durable'))
 
     def register_callback(self, fun):
-        for level in log_levels:
-            self.consumers[level].register_callback(fun)
+        self.callbacks.append(fun)
+
+    def trigger_callbacks(self, messages):
+        for callback in self.callbacks:
+            callback(messages)
 
     def loop(self):
         LOG.debug('Starting Carrot message loop')
+        poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))
         while True:
             for level in log_levels:
-                c = self.consumers[level]
-                #yes, we have to reimplement this manually, because carrot's
-                #  .iter... methods are screwy. -mdragon
+                consumer = self.consumers[level]
+                messages = []
                 for n in xrange(queue_chunks[level]):
-                    msg = c.fetch(enable_callbacks=True)
+                    msg = consumer.fetch(enable_callbacks=False)
                     if not msg:
                         break
+                    try:
+                        messages.append(json.loads(msg.payload))
+                    except Exception, e:
+                        LOG.error('Message decoding failed!')
+                        continue
                     LOG.debug('Received message on queue %s' % level)
                     if not msg.acknowledged:
                         msg.ack()
-            time.sleep(float(conf.get('rabbit_broker', 'poll_delay')))
+                self.trigger_callbacks(messages)
+            time.sleep(poll_delay)
 

@@ -1,7 +1,7 @@
 import yagi.config
 import yagi.utils
 
-yagi.config.defaults('persistence', 'driver', 'yagi.persistence.redis_driver.Driver')
+yagi.config.defaults('persistence', 'driver', 'yagi.persistence.devnull.Driver')
 
 def persistence_driver():
     driver = yagi.config.get('persistence', 'driver')
@@ -9,14 +9,14 @@ def persistence_driver():
 
 
 class Driver(object):
-    def create(self, key, value):
-        raise NotImplementedError
+    def create(self, key, entity_uuid, value):
+        pass
 
-    def get(self, key, entity_id):
-        raise NotImplementedError
+    def get(self, key, entity_uuid):
+        pass
 
     def get_all(self):
-        raise NotImplementedError
+        pass
 
     def get_all_of_type(self, key):
-        raise NotImplementedError
+        pass

@@ -50,7 +50,6 @@ class EventFeed(object):
         return self.respond(req, elements)
 
     def respond(self, req, elements):
-        LOG.debug('serializing feed of %d events' % len(elements))
         response = webob.Response()
         response.content_type = 'application/atom+xml'
         response.body = self.feed_serializer.dumps(elements)

@@ -6,13 +6,14 @@ logger = logging
 
 with yagi.config.defaults_for('logging') as default:
     default('logfile', 'yagi.log')
-    default('default_level', 'DEBUG')
+    default('default_level', 'WARN')
     default('logger', 'logging')
 
 
 class YagiLogger(logging.Logger):
     def __init__(self, name, level=None):
-        logging.Logger.__init__(self, name, logging.DEBUG)
+        logging.Logger.__init__(self, name,
+            logging.getLevelName(yagi.config.get('logging', 'default_level')))
         handlers = []
         handlers.append(logging.StreamHandler())
         logfile = yagi.config.get('logging', 'logfile')

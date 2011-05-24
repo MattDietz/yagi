@@ -84,7 +84,7 @@ def lazy_load_config(fun):
         try:
             return fun(*args, **kwargs)
         except NoOptionError, e:
-            LOG.warn(e)
+            LOG.debug(e)
             return kwargs.get('default', None)
     return decorate
 
