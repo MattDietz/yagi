@@ -14,7 +14,7 @@ class Driver(yagi.persistence.Driver):
     def __init__(self):
         conf = yagi.config.config_with('persistence')
         host = conf('host')
-        port = conf('port', default=6379)
+        port = int(conf('port', default=6379))
         password = conf('password')
         self.client = redis.Redis(host=host, password=password, port=port)
         super(yagi.persistence.Driver, self).__init__()

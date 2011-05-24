@@ -75,9 +75,13 @@ class Broker(object):
                 messages = []
                 for n in xrange(queue_chunks[level]):
                     msg = consumer.fetch(enable_callbacks=False)
-                    messages.append(json.loads(msg.payload))
                     if not msg:
                         break
+                    try:
+                        messages.append(json.loads(msg.payload))
+                    except Exception, e:
+                        LOG.error('Message decoding failed!')
+                        continue
                     LOG.debug('Received message on queue %s' % level)
                     if not msg.acknowledged:
                         msg.ack()
