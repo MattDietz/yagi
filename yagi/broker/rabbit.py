@@ -1,6 +1,8 @@
+import json
+import time
+
 import carrot.connection
 import carrot.messaging
-import time
 
 from yagi import config as conf
 import yagi.log
@@ -73,7 +75,7 @@ class Broker(object):
                 messages = []
                 for n in xrange(queue_chunks[level]):
                     msg = consumer.fetch(enable_callbacks=False)
-                    messages.append(msg)
+                    messages.append(json.loads(msg.payload))
                     if not msg:
                         break
                     LOG.debug('Received message on queue %s' % level)

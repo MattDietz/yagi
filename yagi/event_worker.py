@@ -1,4 +1,3 @@
-import json
 import multiprocessing
 import time
 
@@ -32,12 +31,12 @@ class EventWorker(object):
     def fetched_message(self, messages):
         for message in messages:
             try:
-                event_type = self.persist_event(message.payload)
+                event_type = self.persist_event(message)
             except Exception, e:
                 LOG.debug('Error processing event body', exc_info=True)
         yagi.notifier.api.notify(messages)
 
-    def persist_event(self, message_json):
+    def persist_event(self, message_body):
         """Stores an incoming event in the database
 
         Messages have the following expected attributes:
@@ -51,14 +50,13 @@ class EventWorker(object):
         payload - A python dictionary of attributes
         """
 
-        message_body = json.loads(message_json)
         for key in event_attributes:
             if not key in message_body:
                 raise BadMessageFormatException(
                     "Invalid Message Format, missing key %s" % key)
         event_type = message_body['event_type']
         m_id = message_body['message_id']
-        self.db.create(event_type, m_id, message_json)
+        self.db.create(event_type, m_id, message_body)
         LOG.debug('New notification created')
         return event_type
 
