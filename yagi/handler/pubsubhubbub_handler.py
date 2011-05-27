@@ -8,4 +8,3 @@ class PubSubHubBubHandler(yagi.handler.BaseHandler):
             result = self.app(messages)
         yagi.notifier.api.notify(messages)
         return result
-         

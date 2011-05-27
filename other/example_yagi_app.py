@@ -18,7 +18,7 @@ yagi.create_consumer(
     'notifications.warn',
     PubSubHubBubHandler(RedisHandler()),
     config=queue_config,
-    )
+
 
 yagi.create_consumer(
     'notifications.info',

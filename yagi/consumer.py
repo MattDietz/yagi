@@ -12,5 +12,4 @@ class Consumer(object):
 
     @classmethod
     def fetched_messages(messages):
-        self.app(messages) 
-
+        self.app(messages)

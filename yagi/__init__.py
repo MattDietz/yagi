@@ -5,7 +5,7 @@ import yagi.event_worker
 consumers = []
 
 
-def create_consumer(queue_name, app, config=None):   
+def create_consumer(queue_name, app, config=None):
     consumer = Consumer(app, queue_name, config)
     consumers.append(consumer)
 

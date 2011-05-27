@@ -28,7 +28,7 @@ class Broker(object):
                 password=config('password'),
                 virtual_host=config('vhost'))
         self.consumers = []
-    
+
     def add_consumer(self, consumer):
         self.consumers.append((consumer.config('max_messages'),
             carrot.messaging.Consumer(
