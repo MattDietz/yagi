@@ -1,6 +1,7 @@
 import fcntl
 import socket
 import struct
+import json
 
 import feedgenerator
 
@@ -29,7 +30,7 @@ def write_items(self, handler):
     for item in self.items:
         handler.startElement(u"entry", self.item_attributes(item))
         self.add_item_elements(handler, item)
-        handler.addQuickElement(u"content", item['contents'],
+        handler.addQuickElement(u"content", json.dumps(item['contents']),
                 dict(type='application/json'))
         handler.endElement(u"entry")
 

@@ -78,7 +78,7 @@ class Broker(object):
                     if not msg:
                         break
                     try:
-                        messages.append(json.loads(msg.payload))
+                        messages.append(msg.payload)
                     except Exception, e:
                         LOG.error('Message decoding failed!')
                         continue
@@ -86,5 +86,11 @@ class Broker(object):
                     if not msg.acknowledged:
                         msg.ack()
                 self.trigger_callbacks(messages)
-            time.sleep(poll_delay)
+            if poll_delay:
+                LOG.debug('Sleeping %s seconds...' % poll_delay)
+                time.sleep(poll_delay)
+            else:
+                LOG.debug('Can\'t sleep... Insomnia.' )
+        LOG.debug("WTF?")
+
 
