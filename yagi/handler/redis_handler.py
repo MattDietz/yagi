@@ -17,7 +17,7 @@ class RedisHandler(yagi.handler.BaseHandler):
             self.persist_event(message)
         return result
 
-    def persist_event(self, message):
+    def persist_event(self, message_body):
         """Stores an incoming event in the database
 
         Messages have the following expected attributes:

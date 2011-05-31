@@ -30,7 +30,7 @@ class Broker(object):
         self.consumers = []
 
     def add_consumer(self, consumer):
-        self.consumers.append((consumer.config('max_messages'),
+        self.consumers.append((consumer,
             carrot.messaging.Consumer(
                 connection=self.conn,
                 warn_if_exists=True,
@@ -49,10 +49,10 @@ class Broker(object):
         LOG.debug('Starting Carrot message loop')
         poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))
         while True:
-            for count, consumer in self.consumers:
+            for consumer, queue_conn in self.consumers:
                 messages = []
-                for n in xrange(count):
-                    msg = consumer.fetch(enable_callbacks=False)
+                for n in xrange(int(consumer.config('max_messages'))):
+                    msg = queue_conn.fetch(enable_callbacks=False)
                     if not msg:
                         break
                     try:
@@ -60,7 +60,8 @@ class Broker(object):
                     except Exception, e:
                         LOG.error('Message decoding failed!')
                         continue
-                    LOG.debug('Received message on queue %s' % level)
+                    LOG.debug('Received message on queue %s' %
+                            consumer.queue_name)
                     if not msg.acknowledged:
                         msg.ack()
                 self.trigger_callbacks(messages)

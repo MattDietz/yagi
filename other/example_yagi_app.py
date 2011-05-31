@@ -7,10 +7,10 @@ from yagi.handler.redis_handler import RedisHandler
 from yagi.handler.pubsubhubbub_handler import PubSubHubBubHandler
 
 queue_config = {
-    'exchange': 'exchange',
+    'exchange': 'nova',
     'exchange_type': 'topic',
     'routing_key': 'notifications',
-    'durable': True,
+    'durable': False,
     'max_messages': 100
 }
 
@@ -24,7 +24,7 @@ yagi.create_consumer(
 yagi.create_consumer(
     'notifications.info',
     PubSubHubBubHandler(RedisHandler()),
-    config=queue_config,
+    config=queue_config
     )
 
 yagi.start_consumers()

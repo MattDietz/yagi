@@ -10,6 +10,5 @@ class Consumer(object):
         else:
             self.config = yagi.config.config_with(queue_name)
 
-    @classmethod
-    def fetched_messages(messages):
+    def fetched_messages(self, messages):
         self.app(messages)
