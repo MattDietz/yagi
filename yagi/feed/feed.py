@@ -42,6 +42,7 @@ class EventFeed(object):
     def get_all_of_resource(self, req, resource):
         LOG.debug('get_all_of_resource %s' % resource)
         elements = self.db_driver.get_all_of_type(resource)
+        print elements
         return self.respond(req, elements)
 
     def get_all(self, req):
