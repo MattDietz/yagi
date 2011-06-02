@@ -56,7 +56,7 @@ class Broker(object):
                     if not msg:
                         break
                     try:
-                        messages.append(json.loads(msg.payload))
+                        messages.append(msg.payload)
                     except Exception, e:
                         LOG.error('Message decoding failed!')
                         continue
