@@ -60,7 +60,7 @@ class Broker(object):
                     except Exception, e:
                         LOG.error('Message decoding failed!')
                         continue
-                    LOG.debug('Received message on queue %s' %
+                    LOG.info('Received message on queue %s' %
                             consumer.queue_name)
                     if not msg.acknowledged:
                         msg.ack()

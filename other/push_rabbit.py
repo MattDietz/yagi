@@ -60,6 +60,10 @@ def make_amqp_conn():
     conn = AMQPConnection(**params)
     return conn
 
+def delete_queue(queue):
+    conn = make_amqp_conn()
+    conn.delete_queue()
+
 
 def delete_exchange(exch):
     conn = make_amqp_conn()
