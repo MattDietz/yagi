@@ -1,4 +1,3 @@
-import json
 import datetime
 import os
 import sys
@@ -37,7 +36,7 @@ def cast(msg, event_type, topic, priority):
              password=password, virtual_host=vhost)
     publisher = Publisher(connection=conn, exchange=exchange,
             routing_key=topic, durable=False, exchange_type='topic')
-    publisher.send(json.dumps(message_dict))
+    publisher.send(message_dict)
     publisher.close()
 
 
