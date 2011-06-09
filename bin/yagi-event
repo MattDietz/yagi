@@ -3,17 +3,15 @@
 import os                             
 import sys
 
-import daemon
-
 possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                    os.pardir,
                                    os.pardir))
 if os.path.exists(os.path.join(possible_topdir, 'yagi', '__init__.py')):
     sys.path.insert(0, possible_topdir)
 
+import yagi
 import yagi.commandline
 import yagi.config
-import yagi.event_worker
 import yagi.log
 
 LOG = yagi.log.logger
@@ -24,9 +22,5 @@ if __name__ == '__main__':
         yagi.config.setup(config_path=args.config)
     yagi.log.setup_logging()
     LOG.debug('Initializing Yagi event worker...')
-    if yagi.config.get('event_worker', 'daemonize') == 'True':
-        context = daemon.DaemonContext()
-        LOG.debug('Starting Event Worker daemon')
-        context.pidfile = yagi.config.get('event_worker', 'pidfile')
-        context.open()
-    yagi.event_worker.start()
+    yagi.create_all_consumers()
+    yagi.start_consumers()

@@ -43,5 +43,21 @@ host = localhost
 host = 127.0.0.1
 port = 8000
 
-[notifications_info]
-exchange = exchange
+[consumers]
+queues = notifications.warn, notifications.info
+
+[consumer:notifications.warn]
+apps = yagi.handler.pubsubhubbub_handler.PubSubHubBubHandler, yagi.handler.redis_handler.RedisHandler
+exchange = nova
+exchange_type = topic
+routing_key = notifications.warn
+durable = False
+max_messages = 1000
+
+[consumer:notifications.info]
+apps = yagi.handler.pubsubhubbub_handler.PubSubHubBubHandler, yagi.handler.redis_handler.RedisHandler
+exchange = nova
+exchange_type = topic
+routing_key = notifications.info
+durable = False
+max_messages = 100

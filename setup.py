@@ -22,9 +22,11 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.6'
     ],
+    url = 'https://github.com/Cerberus98/yagi',
     scripts = ['bin/yagi-feed', 'bin/yagi-event'],
     long_description = read('README.md'),
-    install_requires = [],
+    install_requires = ['anyjson', 'redis', 'carrot', 'eventlet', 'feedgenerator', 'PubSubHubbub_Publisher', 'routes', 'WebOb'],
+    data_files = [('', ['yagi.conf.default'])],
     zip_safe = False
 )
 
