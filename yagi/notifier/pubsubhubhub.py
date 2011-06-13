@@ -13,8 +13,9 @@ LOG = yagi.log.logger
 def topic_url(key):
     host = yagi.config.get('event_feed', 'host') or '127.0.0.1'
     port = yagi.config.get('event_feed', 'port', default=80)
-    scheme = yagi.config.get('event_feed', 'use_https') == True
-    if not scheme:
+    if yagi.config.get_bool('event_feed', 'use_https'):
+        scheme = 'https'
+    else:
         scheme = 'http'
     return '%s://%s:%s/%s' % (scheme, host, port, key)
 
@@ -22,7 +23,7 @@ def topic_url(key):
 def hub_url():
     host = yagi.config.get('hub', 'host')
     port = yagi.config.get('hub', 'port', default='80')
-    scheme = yagi.config.get('hub', 'use_https') == True and 'https' or 'http'
+    scheme = 'https' if yagi.config.get_bool('hub', 'use_https') else 'http'
     return "%s://%s:%s" % (scheme, host, port)
 
 

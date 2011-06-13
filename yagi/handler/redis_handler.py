@@ -7,6 +7,7 @@ LOG = yagi.log.logger
 event_attributes = ['message_id', 'publisher_id', 'event_type', 'priority',
                     'payload', 'timestamp']
 
+
 class RedisHandler(yagi.handler.BaseHandler):
     def __call__(self, messages):
         result = None
