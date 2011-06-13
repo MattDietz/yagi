@@ -1,6 +1,8 @@
 import argparse
 
+
 args = None
+
 
 def parse_args(desc):
     parser = argparse.ArgumentParser(description=desc)
