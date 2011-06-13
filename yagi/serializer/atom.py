@@ -2,7 +2,6 @@ import fcntl
 import json
 import socket
 import struct
-import json
 
 import feedgenerator
 

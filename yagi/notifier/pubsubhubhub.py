@@ -23,7 +23,7 @@ def topic_url(key):
 def hub_url():
     host = yagi.config.get('hub', 'host')
     port = yagi.config.get('hub', 'port', default='80')
-    scheme = yagi.config.get_bool('hub', 'use_https') == True and 'https' or 'http'
+    scheme = 'https' if yagi.config.get_bool('hub', 'use_https') else 'http'
     return "%s://%s:%s" % (scheme, host, port)
 
 

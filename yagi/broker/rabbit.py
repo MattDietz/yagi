@@ -17,6 +17,7 @@ with conf.defaults_for('rabbit_broker') as default:
 
 LOG = yagi.log.logger
 
+
 class Broker(object):
     def __init__(self):
         self.callbacks = []
@@ -36,7 +37,7 @@ class Broker(object):
                 warn_if_exists=True,
                 exchange=consumer.config('exchange'),
                 exchange_type=consumer.config('exchange_type'),
-                routing_key = consumer.config('routing_key'),
+                routing_key=consumer.config('routing_key'),
                 queue=consumer.queue_name,
                 durable=consumer.config('durable'))))
         self.callbacks.append(consumer.fetched_messages)
@@ -69,7 +70,5 @@ class Broker(object):
                 LOG.debug('Sleeping %s seconds...' % poll_delay)
                 time.sleep(poll_delay)
             else:
-                LOG.debug('Can\'t sleep... Insomnia.' )
+                LOG.debug('Can\'t sleep... Insomnia.')
         LOG.debug("WTF?")
-
-

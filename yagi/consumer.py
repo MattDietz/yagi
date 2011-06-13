@@ -2,6 +2,7 @@ import yagi.config
 import yagi.log
 import yagi.utils
 
+
 class Consumer(object):
     def __init__(self, queue_name, app=None, config=None):
         self.queue_name = queue_name

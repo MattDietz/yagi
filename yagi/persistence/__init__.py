@@ -1,7 +1,10 @@
 import yagi.config
 import yagi.utils
 
-yagi.config.defaults('persistence', 'driver', 'yagi.persistence.devnull.Driver')
+yagi.config.defaults('persistence',
+                     'driver',
+                     'yagi.persistence.devnull.Driver')
+
 
 def persistence_driver():
     driver = yagi.config.get('persistence', 'driver')
