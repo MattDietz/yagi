@@ -15,7 +15,7 @@ import yagi.log
 
 
 def cast(msg, event_type, topic, priority):
-    yagi.config.setup(config_path='../yagi.conf') 
+    yagi.config.setup(config_path='../yagi.conf')
     conf = yagi.config.config_with('rabbit_broker')
     host = conf('host')
     port = conf('port')
@@ -35,14 +35,15 @@ def cast(msg, event_type, topic, priority):
     conn = BrokerConnection(hostname=host, port=port, userid=user,
              password=password, virtual_host=vhost)
     publisher = Publisher(connection=conn, exchange=exchange,
-            routing_key=topic, durable=False, exchange_type='topic')
+            routing_key="%s.%s" % (topic, priority), durable=False,
+            exchange_type='topic')
     publisher.send(message_dict)
     publisher.close()
 
 
 def make_amqp_conn():
     """Sends a message on a topic without waiting for a response"""
-    yagi.config.setup(config_path='../yagi.conf') 
+    yagi.config.setup(config_path='../yagi.conf')
     conf = yagi.config.config_with('rabbit_broker')
     host = conf('host')
     port = conf('port')
@@ -64,4 +65,4 @@ def make_amqp_conn():
 def delete_exchange(exch):
     conn = make_amqp_conn()
     x = conn.get_channel()
-    x.exchange_delete(exch) 
+    x.exchange_delete(exch)

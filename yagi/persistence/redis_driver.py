@@ -10,6 +10,7 @@ with yagi.config.defaults_for('persistence') as default:
     default('port', 6379)
     default('password', '')
 
+
 class Driver(yagi.persistence.Driver):
     def __init__(self):
         conf = yagi.config.config_with('persistence')
@@ -35,7 +36,7 @@ class Driver(yagi.persistence.Driver):
     def get_all_of_type(self, key):
         def generator():
             elements = self.client.hgetall(key)
-            for k,v in elements.iteritems():
+            for k, v in elements.iteritems():
                 yield k, v
         return self._format(key, generator)
 

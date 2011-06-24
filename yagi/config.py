@@ -12,15 +12,16 @@ CONFIG_PATHS = ['./', '/etc/']
 
 config = None
 config_path = None
-config_defaults = { 'global': {'verbose':'True',
+config_defaults = {'global': {'verbose': 'True',
                                'debug': 'False'},
                     # Defining defaults for this here, as it's usage is spread
                     # out all over the code. -mdragon.
-                    'event_feed': {'pidfile' : 'yagi_feed.pid',
-                                   'daemonize' : 'False',
+                    'event_feed': {'pidfile': 'yagi_feed.pid',
+                                   'daemonize': 'False',
                                    'port': 8080,
                                    'serializer_driver': 'yagi.serializer.atom',
-                                   'feed_title': 'Notifications' }}
+                                   'feed_title': 'Notifications'}}
+
 
 class DefaultConfigParser(SafeConfigParser):
 
@@ -48,6 +49,7 @@ def setup(**kwargs):
     if kwargs['config_path']:
         parse_conf(kwargs['config_path'])
 
+
 def parse_conf(path=None):
     global config, config_path
     config_path = path
@@ -60,19 +62,22 @@ def parse_conf(path=None):
                 break
     else:
         if not os.path.exists(path):
-            raise Exception, "No configuration '%s' found" % path
+            raise Exception("No configuration '%s' found" % path)
     if config_path:
         config.read(config_path)
     return config
+
 
 def defaults(section, option, value):
     section_defaults = config_defaults.get(section) or dict()
     section_defaults[option] = str(value)
     config_defaults[section] = section_defaults
 
+
 @contextmanager
 def defaults_for(section):
     yield functools.partial(defaults, section)
+
 
 def lazy_load_config(fun):
     def decorate(*args, **kwargs):

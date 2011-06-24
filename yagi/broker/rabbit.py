@@ -17,13 +17,14 @@ with conf.defaults_for('rabbit_broker') as default:
 
 LOG = yagi.log.logger
 
+
 class Broker(object):
     def __init__(self):
         self.callbacks = []
         config = conf.config_with('rabbit_broker')
         self.conn = carrot.connection.BrokerConnection(
                 hostname=config('host'),
-                port=5672,
+                port=config('port'),
                 userid=config('user'),
                 password=config('password'),
                 virtual_host=config('vhost'))
@@ -36,9 +37,9 @@ class Broker(object):
                 warn_if_exists=True,
                 exchange=consumer.config('exchange'),
                 exchange_type=consumer.config('exchange_type'),
-                routing_key = consumer.config('routing_key'),
+                routing_key=consumer.config('routing_key'),
                 queue=consumer.queue_name,
-                durable=consumer.config('durable'))))
+                durable=consumer.config('durable') == 'True' or False)))
         self.callbacks.append(consumer.fetched_messages)
 
     def trigger_callbacks(self, messages):
@@ -65,5 +66,9 @@ class Broker(object):
                     if not msg.acknowledged:
                         msg.ack()
                 self.trigger_callbacks(messages)
-            time.sleep(poll_delay)
-
+            if poll_delay:
+                LOG.debug('Sleeping %s seconds...' % poll_delay)
+                time.sleep(poll_delay)
+            else:
+                LOG.debug('Can\'t sleep... Insomnia.')
+        LOG.debug("WTF?")
