@@ -20,7 +20,6 @@ LOG = yagi.log.logger
 
 class Broker(object):
     def __init__(self):
-        self.callbacks = []
         config = conf.config_with('rabbit_broker')
         self.conn = carrot.connection.BrokerConnection(
                 hostname=config('host'),
@@ -40,11 +39,6 @@ class Broker(object):
                 routing_key=consumer.config('routing_key'),
                 queue=consumer.queue_name,
                 durable=consumer.config('durable') == 'True' or False)))
-        self.callbacks.append(consumer.fetched_messages)
-
-    def trigger_callbacks(self, messages):
-        for callback in self.callbacks:
-            callback(messages)
 
     def loop(self):
         LOG.debug('Starting Carrot message loop')
@@ -65,7 +59,7 @@ class Broker(object):
                             consumer.queue_name)
                     if not msg.acknowledged:
                         msg.ack()
-                self.trigger_callbacks(messages)
+                consumer.fetched_messages(messages)
             if poll_delay:
                 LOG.debug('Sleeping %s seconds...' % poll_delay)
                 time.sleep(poll_delay)
