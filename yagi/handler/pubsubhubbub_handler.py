@@ -1,5 +1,6 @@
 import yagi.handler
-import yagi.notifier.api
+import yagi.notifier.pubsubhubbub
+
 
 
 class PubSubHubBubHandler(yagi.handler.BaseHandler):
@@ -7,5 +8,5 @@ class PubSubHubBubHandler(yagi.handler.BaseHandler):
         result = None
         if self.app:
             result = self.app(messages)
-        yagi.notifier.api.notify(messages)
+        yagi.notifier.pubsubhubbub.notify(messages)
         return result

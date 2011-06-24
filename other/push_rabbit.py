@@ -35,7 +35,8 @@ def cast(msg, event_type, topic, priority):
     conn = BrokerConnection(hostname=host, port=port, userid=user,
              password=password, virtual_host=vhost)
     publisher = Publisher(connection=conn, exchange=exchange,
-            routing_key=topic, durable=False, exchange_type='topic')
+            routing_key="%s.%s" % (topic, priority), durable=False,
+            exchange_type='topic')
     publisher.send(message_dict)
     publisher.close()
 
