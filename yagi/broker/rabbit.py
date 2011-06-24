@@ -24,7 +24,7 @@ class Broker(object):
         config = conf.config_with('rabbit_broker')
         self.conn = carrot.connection.BrokerConnection(
                 hostname=config('host'),
-                port=5672,
+                port=config('port'),
                 userid=config('user'),
                 password=config('password'),
                 virtual_host=config('vhost'))
@@ -39,7 +39,7 @@ class Broker(object):
                 exchange_type=consumer.config('exchange_type'),
                 routing_key=consumer.config('routing_key'),
                 queue=consumer.queue_name,
-                durable=consumer.config('durable'))))
+                durable=consumer.config('durable') == 'True' or False)))
         self.callbacks.append(consumer.fetched_messages)
 
     def trigger_callbacks(self, messages):

@@ -5,11 +5,7 @@ debug = False
 [event_worker]
 pidfile = yagi_event_worker.pid
 daemonize = False
-#event_driver = yagi.broker.rabbit.Broker
 event_driver = yagi.broker.fake.Broker
-
-[notifier]
-notifications_driver = yagi.notifier.pubsubhubhub
 
 [rabbit_broker]
 host = localhost
@@ -17,17 +13,12 @@ user = guest
 password = guest
 port = 5672
 vhost = /
-event_topic = notifications
-exchange = nova
-exchange_type = topic
-routing_key = notifications
-durable = False
 poll_delay = 1
 
 [event_feed]
 pidfile = yagi_feed.pid
 daemonize = False
-port = 8080
+port = 8000
 serializer_driver = yagi.serializer.atom
 feed_title = Notifications 
 
@@ -36,12 +27,12 @@ logfile = yagi.log
 default_level = DEBUG
 
 [persistence]
-driver = yagi.persistence.devnull.Driver
+driver = yagi.persistence.redis_driver.Driver
 host = localhost
 
 [hub]
 host = 127.0.0.1
-port = 8000
+port = 8080
 
 [consumers]
 queues = notifications.warn, notifications.info
@@ -51,7 +42,7 @@ apps = yagi.handler.pubsubhubbub_handler.PubSubHubBubHandler, yagi.handler.redis
 exchange = nova
 exchange_type = topic
 routing_key = notifications.warn
-durable = False
+durable = True
 max_messages = 1000
 
 [consumer:notifications.info]
@@ -59,5 +50,5 @@ apps = yagi.handler.pubsubhubbub_handler.PubSubHubBubHandler, yagi.handler.redis
 exchange = nova
 exchange_type = topic
 routing_key = notifications.info
-durable = False
+durable = True
 max_messages = 100
