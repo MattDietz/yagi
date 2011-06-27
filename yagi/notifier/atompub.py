@@ -41,3 +41,4 @@ def notify(notifications):
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
                      % (topic_url, e))
+            raise
