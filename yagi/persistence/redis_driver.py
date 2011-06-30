@@ -33,9 +33,10 @@ class Driver(yagi.persistence.Driver):
         return self._format(generator)
 
     def get_all(self, page_size=None, page=-1):
-        length = self.client.llen('entries')
+        length = self.count()
         start, end = self._page(page, page_size, length)
         uuids = self.client.lrange('entries', start, end)
+
         def generator():
             for uuid in  uuids:
                 event_type = self.client.get('entry:%s:event_type' % uuid)
@@ -44,13 +45,20 @@ class Driver(yagi.persistence.Driver):
         return self._format(generator)
 
     def get_all_of_type(self, key, page_size=None, page=-1):
-        length = self.client.llen('type:%s' % key)
+        length = self.count(key)
         start, end = self._page(page, page_size, length)
         uuids = self.client.lrange('type:%s' % key, start, end)
+
         def generator():
             for uuid in  uuids:
                 yield uuid, self.client.get('entry:%s:content' % uuid), key
         return self._format(generator)
+
+    def count(self, type_key=None):
+        if not type_key:
+            return self.client.llen('entries')
+        else:
+            return self.client.llen('type:%s' % type_key)
 
     def _page(self, page, pagesize, length):
         """ It may seem odd to have paging logic in the persistance drivers
@@ -59,8 +67,7 @@ class Driver(yagi.persistence.Driver):
         are different than Redis's list indexes.) """
         if not pagesize:
             return (0, -1)
-        pages = (length // pagesize) + 1 if length % pagesize \
-                                         else length // pagesize
+        pages = self.pages(pagesize, length)
         if page < 0:
             page = pages - (page * -1)
         if page < 0 or page >= pages:
