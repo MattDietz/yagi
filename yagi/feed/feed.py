@@ -66,7 +66,7 @@ class EventFeed(object):
         elements = self.db_driver.get_all(self.pagesize, page)
         return self.respond(req, elements, page, maxpage)
 
-    def respond(self, req, elements, page, maxpage):
+    def respond(self, req, elements, page=0, maxpage=0):
         response = webob.Response()
         response.content_type = 'application/atom+xml'
         previous_page = next_page = None
