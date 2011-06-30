@@ -11,7 +11,7 @@ LOG = yagi.log.logger
 
 
 def topic_url(key):
-    host = yagi.config.get('event_feed', 'host') or '127.0.0.1'
+    host = yagi.config.get('event_feed', 'feed_host') or '127.0.0.1'
     port = yagi.config.get('event_feed', 'port', default=80)
     if yagi.config.get_bool('event_feed', 'use_https'):
         scheme = 'https'

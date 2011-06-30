@@ -16,7 +16,8 @@ def _entity_link(entity_id, key):
 def _entity_url():
     conf = yagi.config.config_with('event_feed')
     feed_host = conf('feed_host')
-    scheme = "%s://" % (conf('use_https') or 'http')
+    use_https = yagi.config.get_bool('event_feed', 'use_https')
+    scheme = "%s://" % ('https' if use_https else 'http')
     port = conf('port') or ''
     if len(port) > 0:
         port = ':%s' % port
@@ -26,28 +27,45 @@ def _entity_url():
     return unicode(''.join([scheme, feed_host, port, '/']))
 
 
-def write_items(self, handler):
-    for item in self.items:
-        handler.startElement(u"entry", self.item_attributes(item))
-        self.add_item_elements(handler, item)
-        handler.addQuickElement(u"content", json.dumps(item['contents']),
-                dict(type='application/json'))
-        handler.endElement(u"entry")
+class PagedFeed(feedgenerator.Atom1Feed):
+
+    # Get it to care about content elements
+    def write_items(self, handler):
+        for item in self.items:
+            handler.startElement(u"entry", self.item_attributes(item))
+            self.add_item_elements(handler, item)
+            handler.addQuickElement(u"content", json.dumps(item['contents']),
+                    dict(type='application/json'))
+            handler.endElement(u"entry")
+
+    def add_root_elements(self, handler):
+        super(PagedFeed, self).add_root_elements(handler)
+        if self.feed.get('next_page_url') is not None:
+            handler.addQuickElement(u"link",
+                                    "",
+                                    {u"rel": u"next",
+                                     u"href": self.feed['next_page_url']})
+        if self.feed.get('previous_page_url') is not None:
+            handler.addQuickElement(u"link",
+                                    "",
+                                    {u"rel": u"previous",
+                                     u"href": self.feed['previous_page_url']})
 
 
-def dumps(entities):
+def dumps(entities, previous_page=None, next_page=None):
     """Serializes a list of dictionaries as an ATOM feed"""
 
-    # Horrible hack to get it to care about content elements
-    feedgenerator.Atom1Feed.write_items = write_items
-
     title = unicode(yagi.config.get('event_feed', 'feed_title'))
-    feed = feedgenerator.Atom1Feed(
+    feed = PagedFeed(
         title=title,
         link=_entity_url(),
         feed_url=_entity_url(),
         description=title,
-        language=u'en')
+        language=u'en',
+        previous_page_url=("%s?page=%s" % (_entity_url(), previous_page)) \
+                          if previous_page is not None else None,
+        next_page_url=("%s?page=%s" % (_entity_url(), next_page)) \
+                          if next_page is not None else None)
     for entity in entities:
         feed.add_item(
             title=unicode(entity['event_type']),

@@ -16,10 +16,20 @@ class Driver(object):
         pass
 
     def get(self, key, entity_uuid):
-        pass
+        return []
 
     def get_all(self):
-        pass
+        return []
 
     def get_all_of_type(self, key):
-        pass
+        return []
+
+    def count(self, type_key=None):
+        return 1
+
+    def pages(self, pagesize, length):
+        if not pagesize:
+            return 1
+        pages = (length // pagesize) + 1 if length % pagesize \
+                                         else length // pagesize
+        return pages if pages >= 1 else 1
