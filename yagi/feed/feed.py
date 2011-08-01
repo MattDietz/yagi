@@ -14,11 +14,15 @@ import yagi.serializer
 
 LOG = yagi.log.logger
 
+with yagi.config.defaults_for('event_feed') as default:
+    default('pagesize', '1000')
+
 
 class EventFeed(object):
     def __init__(self):
         self.db_driver = yagi.persistence.persistence_driver()
         self.feed_serializer = yagi.serializer.feed_serializer()
+        self.pagesize = int(yagi.config.get('event_feed', 'pagesize'))
 
     @webob.dec.wsgify()
     def route_request(self, req):
@@ -34,6 +38,14 @@ class EventFeed(object):
             return self.get_all_of_resource(req, resource)
         return self.get_all(req)
 
+    def _get_page(self, req, key=None):
+        maxpage = self.db_driver.pages(self.pagesize,
+                                     self.db_driver.count(key)) - 1
+        if 'page' in req.str_params:
+            return (int(req.str_params['page']), maxpage)
+        else:
+            return (maxpage, maxpage)
+
     def get_one(self, req, resource, uuid):
         LOG.debug('get_one %s %s' % (resource, uuid))
         elements = self.db_driver.get(resource, uuid)
@@ -41,19 +53,30 @@ class EventFeed(object):
 
     def get_all_of_resource(self, req, resource):
         LOG.debug('get_all_of_resource %s' % resource)
-        elements = self.db_driver.get_all_of_type(resource)
-        print elements
-        return self.respond(req, elements)
+        page, maxpage = self._get_page(req, resource)
+        elements = self.db_driver.get_all_of_type(resource,
+                                                  self.pagesize,
+                                                  page)
+        #print elements
+        return self.respond(req, elements, page, maxpage)
 
     def get_all(self, req):
         LOG.debug('get_all')
-        elements = self.db_driver.get_all()
-        return self.respond(req, elements)
+        page, maxpage = self._get_page(req)
+        elements = self.db_driver.get_all(self.pagesize, page)
+        return self.respond(req, elements, page, maxpage)
 
-    def respond(self, req, elements):
+    def respond(self, req, elements, page=0, maxpage=0):
         response = webob.Response()
         response.content_type = 'application/atom+xml'
-        response.body = self.feed_serializer.dumps(elements)
+        previous_page = next_page = None
+        if page > 0:
+            previous_page = page - 1
+        if page < maxpage:
+            next_page = page + 1
+        response.body = self.feed_serializer.dumps(elements,
+                                                   previous_page=previous_page,
+                                                   next_page=next_page)
         return response
 
     def listen(self, port):
