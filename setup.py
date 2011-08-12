@@ -29,6 +29,7 @@ setup(
     long_description=read('README.md'),
     install_requires=['anyjson',
                         'redis',
+                        'argparse',
                         'carrot',
                         'eventlet',
                         'feedgenerator',

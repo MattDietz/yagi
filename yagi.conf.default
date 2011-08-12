@@ -18,7 +18,7 @@ poll_delay = 1
 [event_feed]
 pidfile = yagi_feed.pid
 daemonize = False
-port = 8080
+port = 8000
 serializer_driver = yagi.serializer.atom
 feed_title = Notifications 
 
@@ -32,7 +32,7 @@ host = localhost
 
 [hub]
 host = 127.0.0.1
-port = 8000
+port = 8080
 
 [consumers]
 queues = notifications.warn, notifications.info

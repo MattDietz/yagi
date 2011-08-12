@@ -1,7 +1,11 @@
 import sys
 from urllib import urlencode
 
-import httplib2
+try:
+    import httplib2
+except ImportError, e:
+    print "httplib2 not found. Please install it before attempting to continue."
+    sys.exit(1)
 
 def send_subscribe(argv):
     req = httplib2.Http()
@@ -11,7 +15,7 @@ def send_subscribe(argv):
     topic = argv[4]
     form_data = { 
             'hub.mode': 'subscribe', 
-            'hub.topic':'http://127.0.0.1:%/%s' % (topic_port, topic),
+            'hub.topic':'http://127.0.0.1:%s/%s' % (topic_port, topic),
             'hub.callback': 'http://127.0.0.1:%s' % hub_port,
             'hub.verify': 'sync'
             }
