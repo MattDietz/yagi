@@ -18,6 +18,7 @@ lot of flexibility.
 
 ## Dependencies:
 
+* argparse
 * feedgenerator
 * redis
 * webob
@@ -53,7 +54,11 @@ After setting up the hub, above
 
     cd yagi
     cp yagi.conf.default yagi.conf
-    ( edit yagi.conf, setting up as appropriate )
+    # edit yagi.conf, setting up as appropriate
+    # Take care to update the feed_host variable in the event_feed
+    # section as it will be the IP address presented in the feed. Otherwise
+    # Yagi will attempt to infer it, and it doesn't seem to be all that
+    # successful at it.
     sudo cp yagi.conf /etc
     sudo python setup.py install
     yagi-event
@@ -67,7 +72,7 @@ After setting up the hub, above
     # won't daemonize
 
     python subscriber/callback.py <sub_port>
-    python subscriber/sub.py <sub_port> <hub_port>
+    python subscriber/sub.py <topic> <callback> <hub>
 
     # I usually load other/push_rabbit.py in an iPython session
     cd other

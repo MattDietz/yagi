@@ -19,8 +19,9 @@ poll_delay = 1
 pidfile = yagi_feed.pid
 daemonize = False
 port = 8000
+feed_host = 127.0.0.1
 serializer_driver = yagi.serializer.atom
-feed_title = Notifications 
+feed_title = Notifications
 
 [logging]
 logfile = yagi.log

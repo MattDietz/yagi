@@ -4,22 +4,33 @@ from urllib import urlencode
 try:
     import httplib2
 except ImportError, e:
-    print "httplib2 not found. Please install it before attempting to continue."
+    print "httplib2 not found. Please install it before attempting "\
+          "to continue."
     sys.exit(1)
 
 def send_subscribe(argv):
+    """
+    Usage:
+
+    python sub.py <topic url> <callback url> <hub url>
+
+    Example:
+
+    python sub.py http://1.2.3.4/compute.run_instance http://2.3.4.5:8000 \
+                  http://2.3.4.5:8080
+    """
+
     req = httplib2.Http()
-    topic_port = argv[1]
-    hub_port = argv[2]
-    sub_port = argv[3]
-    topic = argv[4]
+    topic = argv[1]
+    callback = argv[2]
+    hub = argv[3]
     form_data = { 
             'hub.mode': 'subscribe', 
-            'hub.topic':'http://127.0.0.1:%s/%s' % (topic_port, topic),
-            'hub.callback': 'http://127.0.0.1:%s' % hub_port,
+            'hub.topic': topic,
+            'hub.callback': callback,
             'hub.verify': 'sync'
             }
-    res, content = req.request('http://127.0.0.1:%s' % sub_port, 'POST',
+    res, content = req.request(hub, 'POST',
             urlencode(form_data))
     print content
 
