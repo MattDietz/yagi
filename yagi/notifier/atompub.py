@@ -21,12 +21,11 @@ def topic_url(key):
 
 
 def notify(notifications):
-    config = yagi.config.config_with('atompub')
-    auth_user = config('user')
-    auth_key = config('key')
-    pub_host = config('host')
+    auth_user = yagi.config.get('atompub', 'user', default=None)
+    auth_key = yagi.config.get('atompub', 'key', default=None)
     conn = httplib2.Http()
-    conn.add_credentials(auth_user, auth_key)
+    if auth_user and auth_key:
+        conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
         yagi.serializer.atom.dumps(notifications)
         notification_body = yagi.serializer.atom.dumps([notification])
