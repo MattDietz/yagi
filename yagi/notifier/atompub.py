@@ -32,8 +32,10 @@ def notify(notifications):
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         try:
-            resp, content = conn.request(topic_url(notification['event_type']),
-                    'POST', body=notification_body, headers=headers)
+            endpoint = topic_url(notification['event_type'])
+            LOG.info('Sending message to %s' % endpoint)
+            resp, content = conn.request(endpoint, 'POST',
+                                     body=notification_body, headers=headers)
             if resp.status != 201:
                 LOG.error('ATOM Pub resource create failed for %s' % topic_url)
 
