@@ -51,12 +51,12 @@ class Broker(object):
                     if not msg:
                         break
                     try:
+                        LOG.info('Received message on queue %s' %
+                            consumer.queue_name)
                         messages.append(msg.payload)
                     except Exception, e:
                         LOG.error('Message decoding failed!')
                         continue
-                    LOG.debug('Received message on queue %s' %
-                            consumer.queue_name)
                     if not msg.acknowledged:
                         msg.ack()
                 consumer.fetched_messages(messages)
