@@ -2,6 +2,8 @@ import yagi.config
 import yagi.log
 import yagi.utils
 
+LOG = yagi.log.logger
+
 
 class Consumer(object):
     def __init__(self, queue_name, app=None, config=None):
@@ -20,4 +22,7 @@ class Consumer(object):
             self.app = prev_app
 
     def fetched_messages(self, messages):
-        self.app(messages)
+        try:
+            self.app(messages)
+        except Exception, e:
+            LOG.error("Error in fetched_messages: \n%s" % e)

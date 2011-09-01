@@ -27,8 +27,6 @@ def notify(notifications):
     if auth_user and auth_key:
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
-        yagi.serializer.atom.dumps(notifications)
-
         # TODO(mdietz): This is a semi-hack to make the notifications look
         # the way the # serializer expects them to look. Move this later
         # to utils
@@ -50,5 +48,4 @@ def notify(notifications):
 
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
-                     % (topic_url, e))
-            raise
+                     % (endpoint, e))
