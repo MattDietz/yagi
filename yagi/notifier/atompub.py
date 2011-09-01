@@ -28,7 +28,16 @@ def notify(notifications):
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
         yagi.serializer.atom.dumps(notifications)
-        notification_body = yagi.serializer.atom.dumps([notification])
+
+        # TODO(mdietz): This is a semi-hack to make the notifications look
+        # the way the # serializer expects them to look. Move this later
+        # to utils
+        formatted_notification = dict(id=notification['message_id'],
+                                      event_type=notification['event_type'],
+                                      content=notification)
+
+        notification_body = yagi.serializer.atom.dumps(
+                                            [formatted_notification])
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         try:
