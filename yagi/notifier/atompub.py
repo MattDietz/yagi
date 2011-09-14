@@ -30,7 +30,7 @@ def notify(notifications):
             resp, content = conn.request(puburl,
                     'POST', body=notification_body, headers=headers)
             if resp.status != 201:
-                LOG.error('ATOM Pub resource create failed for %s' % puburl)
+                LOG.error('ATOM Pub resource create failed for %s Status: %s, %s' % (puburl, resp.status, content) )
 
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
