@@ -38,7 +38,7 @@ class Driver(yagi.persistence.Driver):
         uuids = self.client.lrange('entries', start, end)
 
         def generator():
-            for uuid in  uuids:
+            for uuid in uuids:
                 event_type = self.client.get('entry:%s:event_type' % uuid)
                 content = self.client.get('entry:%s:content' % uuid)
                 yield uuid, content, event_type
@@ -50,7 +50,7 @@ class Driver(yagi.persistence.Driver):
         uuids = self.client.lrange('type:%s' % key, start, end)
 
         def generator():
-            for uuid in  uuids:
+            for uuid in uuids:
                 yield uuid, self.client.get('entry:%s:content' % uuid), key
         return self._format(generator)
 

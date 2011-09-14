@@ -21,18 +21,26 @@ def notify(notifications):
     if auth_user and auth_key:
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
-        yagi.serializer.atom.dumps(notifications)
-        notification_body = yagi.serializer.atom.dumps([notification])
+        # TODO(mdietz): This is a semi-hack to make the notifications look
+        # the way the # serializer expects them to look. Move this later
+        # to utils
+        formatted_notification = dict(id=notification['message_id'],
+                                      event_type=notification['event_type'],
+                                      content=notification)
+
+        notification_body = yagi.serializer.atom.dumps(
+                                            [formatted_notification])
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
         try:
-            resp, content = conn.request(puburl,
-                    'POST', body=notification_body, headers=headers)
+            endpoint = topic_url(notification['event_type'])
+            LOG.info('Sending message to %s' % endpoint)
+            resp, content = conn.request(endpoint, 'POST',
+                                     body=notification_body, headers=headers)
             if resp.status != 201:
                 LOG.error('ATOM Pub resource create failed for %s' % puburl)
 
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
-                     % (puburl, e))
-            raise
+                     % (endpoint, e))
