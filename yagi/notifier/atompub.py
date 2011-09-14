@@ -11,14 +11,8 @@ LOG = yagi.log.logger
 
 
 def topic_url(key):
-    host = yagi.config.get('atompub', 'host') or '127.0.0.1'
-    port = yagi.config.get('atompub', 'port', default=80)
-    if yagi.config.get_bool('atompub', 'use_https'):
-        scheme = 'https'
-    else:
-        scheme = 'http'
-    return '%s://%s:%s/%s' % (scheme, host, port, key)
-
+    url = yagi.config.get('atompub', 'url') or 'http://127.0.0.1/%(event_type)s'
+    return url % dict(event_type=key)
 
 def notify(notifications):
     auth_user = yagi.config.get('atompub', 'user', default=None)
@@ -31,13 +25,14 @@ def notify(notifications):
         notification_body = yagi.serializer.atom.dumps([notification])
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
+        puburl = topic_url(notification['event_type'])
         try:
-            resp, content = conn.request(topic_url(notification['event_type']),
+            resp, content = conn.request(puburl,
                     'POST', body=notification_body, headers=headers)
             if resp.status != 201:
-                LOG.error('ATOM Pub resource create failed for %s' % topic_url)
+                LOG.error('ATOM Pub resource create failed for %s' % puburl)
 
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
-                     % (topic_url, e))
+                     % (puburl, e))
             raise

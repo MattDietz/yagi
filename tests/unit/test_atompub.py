@@ -19,9 +19,7 @@ class AtomPubTests(unittest.TestCase):
         self.stubs = stubout.StubOutForTesting()
         config_dict = {
             'atompub': {
-                'host': '127.0.0.1',
-                'port': '9000',
-                'use_https': False,
+                'url' : 'http://127.0.0.1:9000/test/%(event_type)s',
                 'user': 'user',
                 'key': 'key',
             },
