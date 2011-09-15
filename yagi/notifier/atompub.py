@@ -33,6 +33,7 @@ def notify(notifications):
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
+        LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl, notification_body))
         try:
             endpoint = topic_url(notification['event_type'])
             LOG.info('Sending message to %s' % endpoint)
