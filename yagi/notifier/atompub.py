@@ -22,7 +22,7 @@ def notify(notifications):
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
         #yagi.serializer.atom.dumps(notifications)
-        notification_body = yagi.serializer.atom.dumps([notification])
+        notification_body = yagi.serializer.atom.dump_item(notification)
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])

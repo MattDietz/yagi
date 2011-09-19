@@ -32,11 +32,16 @@ class PagedFeed(feedgenerator.Atom1Feed):
     # Get it to care about content elements
     def write_items(self, handler):
         for item in self.items:
-            handler.startElement(u"entry", self.item_attributes(item))
-            self.add_item_elements(handler, item)
-            handler.addQuickElement(u"content", json.dumps(item['contents']),
-                    dict(type='application/json'))
-            handler.endElement(u"entry")
+            self.write_item(handler, item)
+
+    # Get it to care about content elements
+    def write_item(self, handler, item, root=False):
+        handler.startElement(u"entry",
+                             self.root_attributes() if root else {})
+        self.add_item_elements(handler, item)
+        handler.addQuickElement(u"content", json.dumps(item['contents']),
+                dict(type='application/json'))
+        handler.endElement(u"entry")
 
     def add_root_elements(self, handler):
         super(PagedFeed, self).add_root_elements(handler)
@@ -73,3 +78,28 @@ def dumps(entities, previous_page=None, next_page=None):
             description=unicode(entity['event_type']),
             contents=entity['content'])
     return feed.writeString('utf-8')
+
+
+def dump_item(entity):
+    """Serializes a single dictionary as an ATOM entry"""
+    from StringIO import StringIO
+
+    outfile = StringIO()
+    handler = feedgenerator.SimplerXMLGenerator(outfile, 'utf-8')
+    handler.startDocument()
+    title = unicode(yagi.config.get('event_feed', 'feed_title'))
+    feed = PagedFeed(
+        title=title,
+        link=_entity_url(),
+        feed_url=_entity_url(),
+        description=title,
+        language=u'en',
+        previous_page_url=None,
+        next_page_url=None)
+
+    feed.add_item(title=unicode(entity['event_type']),
+                link=_entity_link(entity['id'], entity['event_type']),
+                description=unicode(entity['event_type']),
+                contents=entity['content'])
+    feed.write_item(handler, feed.items[0], root=True)
+    return outfile.getvalue()
