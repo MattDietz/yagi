@@ -23,17 +23,21 @@ def notify(notifications):
     for notification in notifications:
         #yagi.serializer.atom.dumps(notifications)
         notification_body = yagi.serializer.atom.dump_item(notification)
+
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
-        LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl, notification_body))
+        LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl, 
+                                                            notification_body))
         try:
-            resp, content = conn.request(puburl,
-                    'POST', body=notification_body, headers=headers)
+            endpoint = topic_url(notification['event_type'])
+            LOG.info('Sending message to %s' % endpoint)
+            resp, content = conn.request(endpoint, 'POST',
+                                     body=notification_body, headers=headers)
             if resp.status != 201:
-                LOG.error('ATOM Pub resource create failed for %s Status: %s, %s' % (puburl, resp.status, content) )
+                LOG.error('ATOM Pub resource create failed for %s Status: '
+                          '%s, %s' % (puburl, resp.status, content) )
 
         except Exception, e:
             LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
-                     % (puburl, e))
-            raise
+                     % (endpoint, e))
