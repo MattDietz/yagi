@@ -22,12 +22,15 @@ def notify(notifications):
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
         #yagi.serializer.atom.dumps(notifications)
-        notification_body = yagi.serializer.atom.dump_item(notification)
+        entity = dict(content=notification,
+                      id=notification['message_id'],
+                      event_type=['event_type'])
+        notification_body = yagi.serializer.atom.dump_item(entity)
 
         headers = {'Content-Type': 'application/atom+xml'}
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
-        LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl, 
+        LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl,
                                                             notification_body))
         try:
             endpoint = topic_url(notification['event_type'])
