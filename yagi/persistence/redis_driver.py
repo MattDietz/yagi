@@ -4,10 +4,12 @@ import redis
 
 import yagi.config
 import yagi.persistence
+from yagi.persistence import InvalidEntityUUID
 
 with yagi.config.defaults_for('persistence') as default:
     default('host', 'localhost')
     default('port', 6379)
+    default('entry_ttl', 60*60*24*30)
     default('password', '')
 
 
@@ -17,42 +19,60 @@ class Driver(yagi.persistence.Driver):
         host = conf('host')
         port = int(conf('port', default=6379))
         password = conf('password')
+        self.ttl = int(conf('entry_ttl'))
         self.client = redis.Redis(host=host, password=password, port=port)
         super(yagi.persistence.Driver, self).__init__()
 
     def create(self, key, entity_uuid, value):
-        self.client.set('entry:%s:content' % entity_uuid, json.dumps(value))
+        if self.ttl <= 0:
+            self.client.set('entry:%s:content' % entity_uuid, json.dumps(value))
+        else:
+            self.client.setex('entry:%s:content' % entity_uuid,
+                              json.dumps(value),
+                              self.ttl)
         self.client.set('entry:%s:event_type' % entity_uuid, key)
         self.client.lpush('type:%s' % key, entity_uuid)
         self.client.lpush('entries', entity_uuid)
 
+    def _clean(self, uuid):
+        event_type = self.client.get('entry:%s:event_type' % uuid)
+        self.client.lrem('type:%s' % event_type, uuid, 1)
+        self.client.lrem('entries', uuid, 1)
+        self.client.delete('entry:%s:event_type' % uuid)
+
+    def _get(self, entity_uuid):
+        content = self.client.get('entry:%s:content' % entity_uuid)
+        if not content:
+            self._clean(entity_uuid)
+            raise InvalidEntityUUID("Invalid event uuid: %s" % entity_uuid)
+        event_type = self.client.get('entry:%s:event_type' % entity_uuid)
+        return {'id': entity_uuid, 'content': json.loads(content),
+                'event_type': event_type}
+
     def get(self, key, entity_uuid):
-        def generator():
-            element = self.client.get('entry:%s:content' % entity_uuid)
-            yield entity_uuid, element, key
-        return self._format(generator)
+        """key is no longer used."""
+        return [self._get(entity_uuid)]
+
+    def _get_all(self, index_name, page_size=None, page=-1):
+        while True:
+            bad_uuids = False
+            entities = []
+            length = self.client.llen(index_name)
+            start, end = self._page(page, page_size, length)
+            uuids = self.client.lrange(index_name, start, end)
+            for uuid in uuids:
+                try:
+                    entities.append(self._get(uuid))
+                except InvalidEntityUUID:
+                    bad_uuids = True
+            if not bad_uuids:
+                return entities
 
     def get_all(self, page_size=None, page=-1):
-        length = self.count()
-        start, end = self._page(page, page_size, length)
-        uuids = self.client.lrange('entries', start, end)
-
-        def generator():
-            for uuid in uuids:
-                event_type = self.client.get('entry:%s:event_type' % uuid)
-                content = self.client.get('entry:%s:content' % uuid)
-                yield uuid, content, event_type
-        return self._format(generator)
+        return self._get_all('entries', page_size, page)
 
     def get_all_of_type(self, key, page_size=None, page=-1):
-        length = self.count(key)
-        start, end = self._page(page, page_size, length)
-        uuids = self.client.lrange('type:%s' % key, start, end)
-
-        def generator():
-            for uuid in uuids:
-                yield uuid, self.client.get('entry:%s:content' % uuid), key
-        return self._format(generator)
+        return self._get_all('type:%s' % key, page_size, page)
 
     def count(self, type_key=None):
         if not type_key:
@@ -76,7 +96,3 @@ class Driver(yagi.persistence.Driver):
         start = (end - pagesize) + 1
         start = start if start > 0 else 0
         return (start, end)
-
-    def _format(self, gen):
-        return [{'id': uuid, 'content': json.loads(element),
-                 'event_type': key} for uuid, element, key in gen()]
