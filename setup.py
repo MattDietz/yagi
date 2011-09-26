@@ -33,6 +33,7 @@ setup(
                         'carrot',
                         'eventlet',
                         'feedgenerator',
+                        'httplib2',
                         'PubSubHubbub_Publisher',
                         'routes',
                         'WebOb'],

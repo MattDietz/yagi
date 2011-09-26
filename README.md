@@ -20,6 +20,7 @@ lot of flexibility.
 
 * argparse
 * feedgenerator
+* httplib2
 * redis
 * webob
 * eventlet
