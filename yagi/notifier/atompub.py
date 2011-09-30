@@ -24,7 +24,7 @@ def notify(notifications):
         #yagi.serializer.atom.dumps(notifications)
         entity = dict(content=notification,
                       id=notification['message_id'],
-                      event_type=['event_type'])
+                      event_type=notification['event_type'])
         notification_body = yagi.serializer.atom.dump_item(entity)
 
         headers = {'Content-Type': 'application/atom+xml'}
