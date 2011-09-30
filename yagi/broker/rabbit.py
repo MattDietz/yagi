@@ -61,7 +61,7 @@ class Broker(object):
                         msg.ack()
                 consumer.fetched_messages(messages)
             if poll_delay:
-                LOG.debug('Sleeping %s seconds...' % poll_delay)
+                #LOG.debug('Sleeping %s seconds...' % poll_delay)
                 time.sleep(poll_delay)
             else:
                 LOG.debug('Can\'t sleep... Insomnia.')
