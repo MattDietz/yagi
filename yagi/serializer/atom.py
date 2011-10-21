@@ -27,6 +27,17 @@ def _entity_url():
     return unicode(''.join([scheme, feed_host, port, '/']))
 
 
+def _categories():
+        conf = yagi.config.config_with('event_feed')
+        val = 'atom_categories'
+        return [c.strip() for c in
+                (conf(val).split(',') if conf(val) else [])]
+
+
+def clean_content(cdict):
+    return dict([i for i in cdict.items() if not i[0].startswith('_')])
+
+
 class PagedFeed(feedgenerator.Atom1Feed):
 
     # Get it to care about content elements
@@ -39,7 +50,12 @@ class PagedFeed(feedgenerator.Atom1Feed):
         handler.startElement(u"entry",
                              self.root_attributes() if root else {})
         self.add_item_elements(handler, item)
-        handler.addQuickElement(u"content", json.dumps(item['contents']),
+        # massage date into pedantic ISO8601
+        if 'timestamp' in item['contents']:
+            day, time  = item['contents']['timestamp'].split()
+            handler.addQuickElement(u'created', "%sT%sZ" % (day, time))
+        handler.addQuickElement(u"content",
+                json.dumps(clean_content(item['contents'])),
                 dict(type='application/json'))
         handler.endElement(u"entry")
 
@@ -76,7 +92,8 @@ def dumps(entities, previous_page=None, next_page=None):
             title=unicode(entity['event_type']),
             link=_entity_link(entity['id'], entity['event_type']),
             description=unicode(entity['event_type']),
-            contents=entity['content'])
+            contents=entity['content'],
+            categories=_categories())
     return feed.writeString('utf-8')
 
 
@@ -100,6 +117,7 @@ def dump_item(entity):
     feed.add_item(title=unicode(entity['event_type']),
                 link=_entity_link(entity['id'], entity['event_type']),
                 description=unicode(entity['event_type']),
-                contents=entity['content'])
+                contents=entity['content'],
+                categories=_categories())
     feed.write_item(handler, feed.items[0], root=True)
     return outfile.getvalue()
