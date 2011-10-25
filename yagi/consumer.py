@@ -21,8 +21,15 @@ class Consumer(object):
                 prev_app = yagi.utils.import_class(a)(prev_app)
             self.app = prev_app
 
+    def max_messages(self):
+        return int(self.config('max_messages'))
+
+    def connect(self, connection, consumer):
+        self.connection = connection
+        self.consumer = consumer
+
     def fetched_messages(self, messages):
         try:
             self.app(messages)
         except Exception, e:
-            LOG.error("Error in fetched_messages: \n%s" % e)
+            LOG.exception("Error in fetched_messages: \n%s" % e)

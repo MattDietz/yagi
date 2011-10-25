@@ -38,7 +38,7 @@ def notify(notifications):
 
     for event_type, topic in topics.iteritems():
         try:
-            LOG.debug('Publishing topic %s to %s' % (topic, host))
+            LOG.info('Publishing topic %s to %s' % (topic, host))
             pubsubhubbub_publish.publish(host, topic)
         except pubsubhubbub_publish.PublishError, e:
-            LOG.debug('Publish failed %s' % e)
+            LOG.exception('Publish failed:\n%s' % e)

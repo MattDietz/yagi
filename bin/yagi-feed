@@ -21,12 +21,12 @@ if __name__ == '__main__':
     if args.config:
         yagi.config.setup(config_path=args.config)
         yagi.log.setup_logging()
-    LOG.debug('Initializing yagi feed...')
+    LOG.info('Initializing yagi feed...')
     if yagi.config.get('event_feed', 'daemonize') == 'True':
         try:
             import daemon
         except ImportError, e:
-            print "No daemon library found! Cannot daemonize the feed."
+            LOG.error("No daemon library found! Cannot daemonize the feed.")
             sys.exit(1)
         context = daemon.DaemonContext()
         LOG.debug('Starting daemon')

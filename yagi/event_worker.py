@@ -9,8 +9,6 @@ with yagi.config.defaults_for('event_worker') as default:
     default('daemonize', 'False')
     default('event_driver', 'yagi.broker.rabbit.Broker')
 
-consumers = []
-
 
 def start(consumers):
     broker = yagi.utils.import_class(yagi.config.get('event_worker',
