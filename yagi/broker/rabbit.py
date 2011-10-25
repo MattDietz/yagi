@@ -2,6 +2,7 @@ import json
 import socket
 import time
 
+import amqplib
 import carrot.connection
 import carrot.messaging
 
@@ -46,17 +47,7 @@ class Broker(object):
                                 userid=config('user'),
                                 password=config('password'),
                                 virtual_host=config('vhost'))
-                carrot_consumer = carrot.messaging.Consumer(
-                        connection=connection,
-                        warn_if_exists=True,
-                        exchange=consumer.config('exchange'),
-                        exchange_type=consumer.config('exchange_type'),
-                        routing_key=consumer.config('routing_key'),
-                        queue=consumer.queue_name,
-                        durable=consumer.config('durable') == 'True' or False)
-                consumer.connect(connection, carrot_consumer)
-                LOG.info("Connection established for %s" % consumer.queue_name)
-                return
+                break
             except socket.error, e:
                 delay = reconnect_delay * retries
                 if delay > max_wait:
@@ -64,7 +55,23 @@ class Broker(object):
                 retries += 1
                 LOG.error("Could not reconnect, trying again in %d" % delay)
                 time.sleep(delay)
-        raise Exception("Could not re-establish connection to rabbit! :-(")
+        try:
+            carrot_consumer = carrot.messaging.Consumer(
+                    connection=connection,
+                    warn_if_exists=True,
+                    exchange=consumer.config('exchange'),
+                    exchange_type=consumer.config('exchange_type'),
+                    routing_key=consumer.config('routing_key'),
+                    queue=consumer.queue_name,
+                    auto_delete=consumer.config('auto_delete') == \
+                            'True' or False,
+                    durable=consumer.config('durable') == 'True' or False)
+            consumer.connect(connection, carrot_consumer)
+            LOG.info("Connection established for %s" % consumer.queue_name)
+        except amqplib.client_0_8.exceptions.AMQPConnectionException, e:
+           LOG.error("Bad parameters for queue %s" % consumer.queue_name)
+           LOG.exception(e)
+           raise e
 
     def loop(self):
         poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))

@@ -46,9 +46,13 @@ def notify(notifications):
         conn.add_credentials(auth_user, auth_key)
 
     for notification in notifications:
-        entity = dict(content=notification,
-                      id=notification['id'],
-                      event_type=notification['event_type'])
+        try:
+            entity = dict(content=notification,
+                          id=notification['id'],
+                          event_type=notification['event_type'])
+        except KeyError, e:
+            LOG.error('Malformed Notification: %s' % notification)
+            LOG.exception(e)
         notification_body = yagi.serializer.atom.dump_item(entity)
 
         conn.follow_all_redirects = True
