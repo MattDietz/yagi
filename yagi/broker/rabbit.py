@@ -16,7 +16,7 @@ with conf.defaults_for('rabbit_broker') as default:
     default('vhost', '/')
     default('poll_delay', 1)
     default('reconnect_delay', 5)
-    default('connection_retry_attempts', 3)
+    default('max_wait', 600)
 
 LOG = yagi.log.logger
 
@@ -33,9 +33,12 @@ class Broker(object):
         # for now all consumers use the same queue connection
         # That may not be the case forever
         config = conf.config_with('rabbit_broker')
+        reconnect_delay = int(config('reconnect_delay'))
+        max_wait = int(config('max_wait'))
 
         # try a few times to connect, we might have lost the connection
-        for i in xrange(int(config('connection_retry_attempts'))):
+        retries = 0
+        while True:
             try:
                 connection = carrot.connection.BrokerConnection(
                                 hostname=config('host'),
@@ -52,9 +55,14 @@ class Broker(object):
                         queue=consumer.queue_name,
                         durable=consumer.config('durable') == 'True' or False)
                 consumer.connect(connection, carrot_consumer)
+                LOG.info("Connection established for %s" % consumer.queue_name)
                 return
             except socket.error, e:
-                delay = int(config('reconnect_delay')) * i
+                delay = reconnect_delay * retries
+                if delay > max_wait:
+                    delay = max_wait
+                retries += 1
+                LOG.error("Could not reconnect, trying again in %d" % delay)
                 time.sleep(delay)
         raise Exception("Could not re-establish connection to rabbit! :-(")
 
@@ -84,4 +92,4 @@ class Broker(object):
                 LOG.critical("Rabbit connection lost, reconnecting")
                 self.establish_consumer_connection(consumer)
             except Exception, e:
-                LOG.critical(e)
+                LOG.exception(e)
