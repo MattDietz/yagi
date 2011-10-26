@@ -48,19 +48,19 @@ def notify(notifications):
     for notification in notifications:
         try:
             entity = dict(content=notification,
-                          id=notification['id'],
+                          id=notification['message_id'],
                           event_type=notification['event_type'])
+            notification_body = yagi.serializer.atom.dump_item(entity)
         except KeyError, e:
             LOG.error('Malformed Notification: %s' % notification)
             LOG.exception(e)
-        notification_body = yagi.serializer.atom.dump_item(entity)
 
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
         LOG.debug('ATOM Pub post to: %s *******\n%s\n=======' % (puburl,
                                                             notification_body))
         endpoint = topic_url(notification['event_type'])
-        for i in xrange(yagi.config.get('atompub', 'retries')):
+        for i in xrange(int(yagi.config.get('atompub', 'retries'))):
             try:
                 _send_notification(endpoint, puburl, notification_body, conn)
                 break
