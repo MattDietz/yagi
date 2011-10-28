@@ -16,6 +16,7 @@ LOG = yagi.log.logger
 
 with yagi.config.defaults_for('event_feed') as default:
     default('pagesize', '1000')
+    default('port', '8080')
 
 
 class EventFeed(object):

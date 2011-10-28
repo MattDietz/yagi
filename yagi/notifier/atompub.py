@@ -5,13 +5,16 @@ import yagi.log
 import yagi.serializer.atom
 
 with yagi.config.defaults_for('atompub') as default:
-    pass
+    default("auth_key", 'key')
+    default("auth_user", 'user')
+    default("url", 'http://127.0.0.1/foo')
 
 LOG = yagi.log.logger
 
 
 def topic_url(key):
-    url = yagi.config.get('atompub', 'url') or 'http://127.0.0.1/%(event_type)s'
+    url = yagi.config.get('atompub', 'url') or \
+            'http://127.0.0.1/%(event_type)s'
     return url % dict(event_type=key)
 
 def notify(notifications):
@@ -23,7 +26,7 @@ def notify(notifications):
     for notification in notifications:
         #yagi.serializer.atom.dumps(notifications)
         entity = dict(content=notification,
-                      id=notification['message_id'],
+                      id=notification['id'],
                       event_type=notification['event_type'])
         notification_body = yagi.serializer.atom.dump_item(entity)
 

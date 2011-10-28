@@ -6,7 +6,6 @@ import webob
 
 import yagi.config
 import yagi.notifier.atompub
-from tests.unit import fake
 
 class MockResponse(object):
     def __init__(self, status_code=200):
@@ -30,9 +29,6 @@ class AtomPubTests(unittest.TestCase):
                 'port': 'port'
             }
         }
-        fake.config_dict = config_dict
-        self.stubs.Set(yagi, 'config', fake.MockConfig())
-        self.stubs.Set(yagi, 'config', fake.MockConfig())
 
     def tearDown(self):
         self.stubs.UnsetAll()
