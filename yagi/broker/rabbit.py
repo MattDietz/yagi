@@ -41,28 +41,27 @@ class Broker(object):
                 durable=consumer.config('durable') == 'True' or False)))
 
     def loop(self):
-        LOG.debug('Starting Carrot message loop')
         poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))
+        max_messages = int(consumer.config('max_messages'))
         while True:
-            for consumer, queue_conn in self.consumers:
-                messages = []
-                for n in xrange(int(consumer.config('max_messages'))):
-                    msg = queue_conn.fetch(enable_callbacks=False)
-                    if not msg:
-                        break
-                    try:
-                        LOG.info('Received message on queue %s' %
-                            consumer.queue_name)
-                        messages.append(msg.payload)
-                    except Exception, e:
-                        LOG.error('Message decoding failed!')
-                        continue
-                    if not msg.acknowledged:
-                        msg.ack()
-                consumer.fetched_messages(messages)
-            if poll_delay:
-                #LOG.debug('Sleeping %s seconds...' % poll_delay)
-                time.sleep(poll_delay)
-            else:
-                LOG.debug('Can\'t sleep... Insomnia.')
-        LOG.debug("WTF?")
+            try:
+                for consumer, queue_conn in self.consumers:
+                    messages = []
+                    for n in xrange(max_messages):
+                        msg = queue_conn.fetch(enable_callbacks=False)
+                        if not msg:
+                            break
+                        try:
+                            LOG.info('Received message on queue %s' %
+                                consumer.queue_name)
+                            messages.append(msg.payload)
+                        except Exception, e:
+                            LOG.error('Message decoding failed!')
+                            continue
+                        if not msg.acknowledged:
+                            msg.ack()
+                    consumer.fetched_messages(messages)
+                if poll_delay:
+                    time.sleep(poll_delay)
+            except Exception, e:
+                LOG.critical(e)

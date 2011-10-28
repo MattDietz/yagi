@@ -24,7 +24,6 @@ def notify(notifications):
     if auth_user and auth_key:
         conn.add_credentials(auth_user, auth_key)
     for notification in notifications:
-        #yagi.serializer.atom.dumps(notifications)
         entity = dict(content=notification,
                       id=notification['id'],
                       event_type=notification['event_type'])
@@ -41,9 +40,9 @@ def notify(notifications):
             resp, content = conn.request(endpoint, 'POST',
                                      body=notification_body, headers=headers)
             if resp.status != 201:
-                LOG.error('ATOM Pub resource create failed for %s Status: '
+                LOG.error('AtomPub resource create failed for %s Status: '
                           '%s, %s' % (puburl, resp.status, content) )
 
         except Exception, e:
-            LOG.error('Error sending notification to ATOM Pub resource%s\n\n%s'
+            LOG.error('Error sending notification to AtomPub resource%s\n\n%s'
                      % (endpoint, e))

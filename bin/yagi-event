@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os                             
+import os
 import sys
 
 possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
@@ -21,6 +21,6 @@ if __name__ == '__main__':
     if args.config:
         yagi.config.setup(config_path=args.config)
     yagi.log.setup_logging()
-    LOG.debug('Initializing Yagi event worker...')
+    LOG.info('Initializing Yagi event worker...')
     yagi.create_all_consumers()
     yagi.start_consumers()

@@ -19,7 +19,7 @@ def create_all_consumers():
 def start_consumers():
     if yagi.config.get('event_worker', 'daemonize') == 'True':
         context = daemon.DaemonContext()
-        LOG.debug('Starting Event Worker daemon')
+        LOG.info('Starting Event Worker daemon')
         context.pidfile = yagi.config.get('event_worker', 'pidfile')
         context.open()
     yagi.event_worker.start(consumers)
