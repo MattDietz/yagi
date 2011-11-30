@@ -25,12 +25,10 @@ def topic_url(key):
 def _send_notification(endpoint, puburl, body, conn):
     LOG.info('Sending message to %s' % endpoint)
     headers = {'Content-Type': 'application/atom+xml'}
-    resp = None
     try:
         resp, content = conn.request(endpoint, 'POST',
                                      body=body,
                                      headers=headers)
-    else:
         if resp.status != 201:
             msg = ('AtomPub resource create failed for %s Status: '
                         '%s, %s' % (puburl, resp.status, content) )
@@ -63,6 +61,5 @@ def notify(notifications):
                 _send_notification(endpoint, puburl, notification_body, conn)
                 break
             except MessageDeliveryFailed, e:
-                LOG.error('Error sending notification to AtomPub'
-                          'resource %s\n%s' % (endpoint, e))
+                LOG.error(e)
                 continue
