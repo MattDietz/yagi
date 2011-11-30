@@ -1,3 +1,4 @@
+import functools
 import unittest
 
 import httplib2
@@ -21,6 +22,7 @@ class AtomPubTests(unittest.TestCase):
                 'url' : 'http://127.0.0.1:9000/test/%(event_type)s',
                 'user': 'user',
                 'key': 'key',
+                'retries': 1
             },
             'event_feed': {
                 'feed_title': 'feed_title',
@@ -30,15 +32,30 @@ class AtomPubTests(unittest.TestCase):
             }
         }
 
+        def get(*args, **kwargs):
+            val = None
+            for arg in args:
+                if val:
+                    val = val.get(arg)
+                else:
+                    val = config_dict.get(arg)
+                    if not val:
+                        return None or kwargs.get('default')
+            return val
+
+        def config_with(*args):
+            return functools.partial(get, args)
+
+        self.stubs.Set(yagi.config, 'config_with', config_with)
+        self.stubs.Set(yagi.config, 'get', get)
+
     def tearDown(self):
         self.stubs.UnsetAll()
 
     def test_notify(self):
-        messages = [
-            { 'event_type': 'instance_create',
-              'id': 1,
-              'content': dict(a=3) }
-        ]
+        messages = [{'event_type': 'instance_create',
+                     'id': 1,
+                     'content': dict(a=3)}]
         self.called = False
         def mock_request(*args, **kwargs):
             self.called = True
