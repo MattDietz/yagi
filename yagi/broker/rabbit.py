@@ -42,11 +42,11 @@ class Broker(object):
 
     def loop(self):
         poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))
-        max_messages = int(consumer.config('max_messages'))
         while True:
             try:
                 for consumer, queue_conn in self.consumers:
                     messages = []
+                    max_messages = int(consumer.config('max_messages'))
                     for n in xrange(max_messages):
                         msg = queue_conn.fetch(enable_callbacks=False)
                         if not msg:
