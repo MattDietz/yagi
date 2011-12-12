@@ -54,7 +54,7 @@ class AtomPubTests(unittest.TestCase):
 
     def test_notify(self):
         messages = [{'event_type': 'instance_create',
-                     'id': 1,
+                     'message_id': 1,
                      'content': dict(a=3)}]
         self.called = False
         def mock_request(*args, **kwargs):
@@ -68,7 +68,7 @@ class AtomPubTests(unittest.TestCase):
     def test_notify_fails(self):
         messages = [
             { 'event_type': 'instance_create',
-              'id': 1,
+              'message_id': 1,
               'content': dict(a=3) }
         ]
         self.called = False
