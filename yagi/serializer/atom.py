@@ -88,12 +88,13 @@ def dumps(entities, previous_page=None, next_page=None):
         next_page_url=("%s?page=%s" % (_entity_url(), next_page)) \
                           if next_page is not None else None)
     for entity in entities:
+        event_type=unicode(entity['event_type'])
         feed.add_item(
             title=unicode(entity['event_type']),
             link=_entity_link(entity['id'], entity['event_type']),
-            description=unicode(entity['event_type']),
+            description=event_type,
             contents=entity['content'],
-            categories=_categories())
+            categories=[event_type] + _categories())
     return feed.writeString('utf-8')
 
 
@@ -114,10 +115,11 @@ def dump_item(entity):
         previous_page_url=None,
         next_page_url=None)
 
+    event_type=unicode(entity['event_type'])
     feed.add_item(title=unicode(entity['event_type']),
                 link=_entity_link(entity['id'], entity['event_type']),
-                description=unicode(entity['event_type']),
+                description=event_type,
                 contents=entity['content'],
-                categories=_categories())
+                categories=[event_type] + _categories())
     feed.write_item(handler, feed.items[0], root=True)
     return outfile.getvalue()
