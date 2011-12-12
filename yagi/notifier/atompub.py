@@ -54,6 +54,7 @@ def notify(notifications):
         except KeyError, e:
             LOG.error('Malformed Notification: %s' % notification)
             LOG.exception(e)
+            continue
 
         conn.follow_all_redirects = True
         puburl = topic_url(notification['event_type'])
