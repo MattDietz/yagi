@@ -37,6 +37,6 @@ setup(
                         'PubSubHubbub_Publisher',
                         'routes',
                         'WebOb'],
-    data_files=[('', ['yagi.conf.default'])],
+    data_files=[('', ['etc/yagi.conf'])],
     zip_safe=False
 )
