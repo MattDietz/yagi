@@ -54,7 +54,6 @@ Start the hub
 After setting up the hub, above
 
     cd yagi
-    cp yagi.conf.default yagi.conf
     # edit yagi.conf, setting up as appropriate
     # Take care to update the feed_host variable in the event_feed
     # section as it will be the IP address presented in the feed. Otherwise
