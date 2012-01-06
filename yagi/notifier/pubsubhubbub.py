@@ -32,9 +32,13 @@ def notify(notifications):
     topics = {}
     # Compile the list of updated topic urls
     for notification in notifications:
-        event_type = notification['event_type']
-        if not event_type in topics:
-            topics[event_type] = topic_url(event_type)
+        try:
+            event_type = notification['event_type']
+            if not event_type in topics:
+                topics[event_type] = topic_url(event_type)
+        except KeyError, e:
+            LOG.error('Malformed Notification: %s' % notification)
+            LOG.exception(e)
 
     for event_type, topic in topics.iteritems():
         try:
