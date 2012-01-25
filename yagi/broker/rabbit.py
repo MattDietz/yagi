@@ -3,8 +3,8 @@ import socket
 import time
 
 import amqplib
-import carrot.connection
-import carrot.messaging
+from carrot.connection import BrokerConnection
+from carrot.messaging import Consumer
 
 from yagi import config as conf
 import yagi.log
@@ -20,6 +20,64 @@ with conf.defaults_for('rabbit_broker') as default:
     default('max_wait', 600)
 
 LOG = yagi.log.logger
+
+def confbool(val):
+    if val in ('Default', None, 'None'):
+        return None
+    return val == 'True' or False
+
+class NotQuiteSoStupidConsumer(Consumer):
+    """ Carrot is quite broken/braindead in a number of ways.
+    The proper way we should fix this is by having Yagi use Kombu for it's
+    queue reading, however, until we have that done, this shim class fixes
+    some of the carrot consumer class's brokenness.
+
+    To be specific: Both queues and exchanges can be declared as durable
+    and/or auto_delete (or not), *separately*. Carrot uses the same setting
+    for declaring both queues and exchange. THus if your queue is durable,
+    and the exchange is not, or vice versa, carrot cannot handle it.
+    I don't know why you would want that, but Nova currently declares it's
+    queues this way."""
+
+    _init_opts = Consumer._init_opts + ('exchange_durable',
+                                        'exchange_auto_delete')
+
+    exchange_durable = None
+    exchange_auto_delete = None
+
+    def declare(self):
+        """Declares the queue, the exchange and binds the queue to
+           the exchange."""
+        arguments = None
+        routing_key = self.routing_key
+        if self.exchange_type == "headers":
+            arguments, routing_key = routing_key, ""
+
+        if self.queue:
+            self.backend.queue_declare(queue=self.queue, durable=self.durable,
+                                       exclusive=self.exclusive,
+                                       auto_delete=self.auto_delete,
+                                       warn_if_exists=self.warn_if_exists)
+        edurable = self.durable \
+                   if self.exchange_durable is None \
+                   else self.exchange_durable
+        eauto_delete = self.auto_delete \
+                   if self.exchange_auto_delete is None \
+                   else self.exchange_auto_delete
+
+        if self.exchange:
+            self.backend.exchange_declare(exchange=self.exchange,
+                                          type=self.exchange_type,
+                                          durable=edurable,
+                                          auto_delete=eauto_delete)
+        if self.queue:
+            self.backend.queue_bind(queue=self.queue,
+                                    exchange=self.exchange,
+                                    routing_key=routing_key,
+                                    arguments=arguments)
+        self._closed = False
+        return self
+
 
 
 class Broker(object):
@@ -41,7 +99,7 @@ class Broker(object):
         retries = 0
         while True:
             try:
-                connection = carrot.connection.BrokerConnection(
+                connection = BrokerConnection(
                                 hostname=config('host'),
                                 port=config('port'),
                                 userid=config('user'),
@@ -55,17 +113,26 @@ class Broker(object):
                 retries += 1
                 LOG.error("Could not reconnect, trying again in %d" % delay)
                 time.sleep(delay)
+
+        auto_delete = consumer.config('auto_delete') == 'True' or False
+        durable = consumer.config('durable') == 'True' or False
+
+        exdurable = confbool(consumer.config('exchange_durable'))
+        exauto_delete = confbool(consumer.config('exchange_auto_delete'))
+
         try:
-            carrot_consumer = carrot.messaging.Consumer(
+            carrot_consumer = NotQuiteSoStupidConsumer(
                     connection=connection,
                     warn_if_exists=True,
                     exchange=consumer.config('exchange'),
                     exchange_type=consumer.config('exchange_type'),
                     routing_key=consumer.config('routing_key'),
                     queue=consumer.queue_name,
-                    auto_delete=consumer.config('auto_delete') == \
-                            'True' or False,
-                    durable=consumer.config('durable') == 'True' or False)
+                    auto_delete=auto_delete,
+                    durable=durable,
+                    exchange_durable=exdurable,
+                    exchange_auto_delete=exauto_delete,
+                    )
             consumer.connect(connection, carrot_consumer)
             LOG.info("Connection established for %s" % consumer.queue_name)
         except amqplib.client_0_8.exceptions.AMQPConnectionException, e:
