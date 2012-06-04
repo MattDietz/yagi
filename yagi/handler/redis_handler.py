@@ -9,16 +9,13 @@ event_attributes = ['message_id', 'publisher_id', 'event_type', 'priority',
 
 
 class RedisHandler(yagi.handler.BaseHandler):
-    def __call__(self, messages):
-        result = None
-        if self.app:
-            result = self.app(messages)
-        self.db = yagi.persistence.persistence_driver()
-        for message in messages:
-            self.persist_event(message)
-        return result
 
-    def persist_event(self, message_body):
+    def handle_messages(self, messages):
+        db = yagi.persistence.persistence_driver()
+        for message in messages:
+            self._persist_event(db, message)
+
+    def _persist_event(self, db, message_body):
         """Stores an incoming event in the database
 
         Messages have the following expected attributes:
@@ -36,5 +33,5 @@ class RedisHandler(yagi.handler.BaseHandler):
                 LOG.error("Invalid Message Format, missing key %s" % key)
         event_type = message_body['event_type']
         m_id = message_body['message_id']
-        self.db.create(event_type, m_id, message_body)
+        db.create(event_type, m_id, message_body)
         LOG.debug('New notification created')

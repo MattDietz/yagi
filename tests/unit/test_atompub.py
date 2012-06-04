@@ -6,7 +6,8 @@ import stubout
 import webob
 
 import yagi.config
-import yagi.notifier.atompub
+
+from yagi.handler.atompub_handler import AtomPub
 
 class MockResponse(object):
     def __init__(self, status_code=200):
@@ -31,6 +32,8 @@ class AtomPubTests(unittest.TestCase):
                 'port': 'port'
             }
         }
+
+        self.handler = AtomPub()
 
         def get(*args, **kwargs):
             val = None
@@ -62,7 +65,7 @@ class AtomPubTests(unittest.TestCase):
             return MockResponse(201), None
 
         self.stubs.Set(httplib2.Http, 'request', mock_request)
-        yagi.notifier.atompub.notify(messages)
+        self.handler.handle_messages(messages)
         self.assertEqual(self.called, True)
 
     def test_notify_fails(self):
@@ -77,5 +80,5 @@ class AtomPubTests(unittest.TestCase):
             return MockResponse(404), None
 
         self.stubs.Set(httplib2.Http, 'request', mock_request)
-        yagi.notifier.atompub.notify(messages)
+        self.handler.handle_messages(messages)
         self.assertEqual(self.called, True)

@@ -18,7 +18,8 @@ class Consumer(object):
             apps = [a.strip() for a in self.config('apps').split(',')]
             prev_app = None
             for a in apps:
-                prev_app = yagi.utils.import_class(a)(prev_app)
+                prev_app = yagi.utils.import_class(a)(prev_app,
+                                                      queue_name=self.queue_name)
             self.app = prev_app
 
     def max_messages(self):
