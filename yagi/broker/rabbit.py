@@ -9,38 +9,38 @@ from carrot.messaging import Consumer
 from yagi import config as conf
 import yagi.log
 
-with conf.defaults_for('rabbit_broker') as default:
-    default('host', 'localhost')
-    default('user', 'guest')
-    default('password', 'guest')
-    default('port', 5672)
-    default('vhost', '/')
-    default('poll_delay', 1)
-    default('reconnect_delay', 5)
-    default('max_wait', 600)
+with conf.defaults_for("rabbit_broker") as default:
+    default("host", "localhost")
+    default("user", "guest")
+    default("password", "guest")
+    default("port", 5672)
+    default("vhost", "/")
+    default("poll_delay", 1)
+    default("reconnect_delay", 5)
+    default("max_wait", 600)
 
 LOG = yagi.log.logger
 
 def confbool(val):
-    if val in ('Default', None, 'None'):
+    if val in ("Default", None, "None"):
         return None
-    return val == 'True' or False
+    return val == "True" or False
 
 class NotQuiteSoStupidConsumer(Consumer):
     """ Carrot is quite broken/braindead in a number of ways.
-    The proper way we should fix this is by having Yagi use Kombu for it's
+    The proper way we should fix this is by having Yagi use Kombu for it"s
     queue reading, however, until we have that done, this shim class fixes
-    some of the carrot consumer class's brokenness.
+    some of the carrot consumer class"s brokenness.
 
     To be specific: Both queues and exchanges can be declared as durable
     and/or auto_delete (or not), *separately*. Carrot uses the same setting
     for declaring both queues and exchange. THus if your queue is durable,
     and the exchange is not, or vice versa, carrot cannot handle it.
-    I don't know why you would want that, but Nova currently declares it's
+    I don"t know why you would want that, but Nova currently declares it"s
     queues this way."""
 
-    _init_opts = Consumer._init_opts + ('exchange_durable',
-                                        'exchange_auto_delete')
+    _init_opts = Consumer._init_opts + ("exchange_durable",
+                                        "exchange_auto_delete")
 
     exchange_durable = None
     exchange_auto_delete = None
@@ -91,20 +91,20 @@ class Broker(object):
     def establish_consumer_connection(self, consumer):
         # for now all consumers use the same queue connection
         # That may not be the case forever
-        config = conf.config_with('rabbit_broker')
-        reconnect_delay = int(config('reconnect_delay'))
-        max_wait = int(config('max_wait'))
+        config = conf.config_with("rabbit_broker")
+        reconnect_delay = int(config("reconnect_delay"))
+        max_wait = int(config("max_wait"))
 
         # try a few times to connect, we might have lost the connection
         retries = 0
         while True:
             try:
                 connection = BrokerConnection(
-                                hostname=config('host'),
-                                port=config('port'),
-                                userid=config('user'),
-                                password=config('password'),
-                                virtual_host=config('vhost'))
+                                hostname=config("host"),
+                                port=config("port"),
+                                userid=config("user"),
+                                password=config("password"),
+                                virtual_host=config("vhost"))
                 break
             except socket.error, e:
                 delay = reconnect_delay * retries
@@ -114,19 +114,19 @@ class Broker(object):
                 LOG.error("Could not reconnect, trying again in %d" % delay)
                 time.sleep(delay)
 
-        auto_delete = consumer.config('auto_delete') == 'True' or False
-        durable = consumer.config('durable') == 'True' or False
+        auto_delete = consumer.config("auto_delete") == "True" or False
+        durable = consumer.config("durable") == "True" or False
 
-        exdurable = confbool(consumer.config('exchange_durable'))
-        exauto_delete = confbool(consumer.config('exchange_auto_delete'))
+        exdurable = confbool(consumer.config("exchange_durable"))
+        exauto_delete = confbool(consumer.config("exchange_auto_delete"))
 
         try:
             carrot_consumer = NotQuiteSoStupidConsumer(
                     connection=connection,
                     warn_if_exists=True,
-                    exchange=consumer.config('exchange'),
-                    exchange_type=consumer.config('exchange_type'),
-                    routing_key=consumer.config('routing_key'),
+                    exchange=consumer.config("exchange"),
+                    exchange_type=consumer.config("exchange_type"),
+                    routing_key=consumer.config("routing_key"),
                     queue=consumer.queue_name,
                     auto_delete=auto_delete,
                     durable=durable,
@@ -141,7 +141,7 @@ class Broker(object):
            raise e
 
     def loop(self):
-        poll_delay = float(conf.get('rabbit_broker', 'poll_delay'))
+        poll_delay = float(conf.get("rabbit_broker", "poll_delay"))
         while True:
             try:
                 for consumer in self.consumers:
@@ -151,14 +151,12 @@ class Broker(object):
                         if not msg:
                             break
                         try:
-                            LOG.info('Received message on queue %s' %
+                            LOG.info("Received message on queue %s" %
                                 consumer.queue_name)
-                            messages.append(msg.payload)
+                            messages.append(msg)
                         except Exception, e:
-                            LOG.error('Message decoding failed!')
+                            LOG.error("Message decoding failed!")
                             continue
-                        if not msg.acknowledged:
-                            msg.ack()
                     consumer.fetched_messages(messages)
                 if poll_delay:
                     time.sleep(poll_delay)

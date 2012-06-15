@@ -15,7 +15,7 @@ import yagi.log
 
 
 def cast(msg, event_type, topic, priority):
-    yagi.config.setup(config_path='../yagi.conf')
+    yagi.config.setup(config_path='/etc/yagi.conf')
     conf = yagi.config.config_with('rabbit_broker')
     host = conf('host')
     port = conf('port')
@@ -43,7 +43,7 @@ def cast(msg, event_type, topic, priority):
 
 def make_amqp_conn():
     """Sends a message on a topic without waiting for a response"""
-    yagi.config.setup(config_path='../yagi.conf')
+    yagi.config.setup(config_path='/etc/yagi.conf')
     conf = yagi.config.config_with('rabbit_broker')
     host = conf('host')
     port = conf('port')

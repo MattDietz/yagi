@@ -9,9 +9,29 @@ import yagi.config
 
 from yagi.handler.atompub_handler import AtomPub
 
+
 class MockResponse(object):
     def __init__(self, status_code=200):
         self.status = status_code
+
+
+class MockNotification(object):
+    def __init__(self, attrs):
+        self.attrs = attrs
+
+    def ack(self):
+        pass
+
+    def __getitem__(self, key):
+        return self.attrs[key]
+
+    def __setitem__(self, key, value):
+        self.attrs[key] = value
+
+    @property
+    def payload(self):
+        return self.attrs
+
 
 class AtomPubTests(unittest.TestCase):
     """Tests to ensure the ATOM Pub code holds together as expected"""
@@ -23,6 +43,8 @@ class AtomPubTests(unittest.TestCase):
                 'url' : 'http://127.0.0.1:9000/test/%(event_type)s',
                 'user': 'user',
                 'key': 'key',
+                'interval': 30,
+                'max_wait': 600,
                 'retries': 1
             },
             'event_feed': {
@@ -30,6 +52,9 @@ class AtomPubTests(unittest.TestCase):
                 'feed_host': 'feed_host',
                 'use_https': False,
                 'port': 'port'
+            },
+            'handler_auth': {
+                'method': 'no_auth'
             }
         }
 
@@ -56,9 +81,10 @@ class AtomPubTests(unittest.TestCase):
         self.stubs.UnsetAll()
 
     def test_notify(self):
-        messages = [{'event_type': 'instance_create',
+        messages = [MockNotification(
+                    {'event_type': 'instance_create',
                      'message_id': 1,
-                     'content': dict(a=3)}]
+                     'content': dict(a=3)})]
         self.called = False
         def mock_request(*args, **kwargs):
             self.called = True
@@ -69,11 +95,10 @@ class AtomPubTests(unittest.TestCase):
         self.assertEqual(self.called, True)
 
     def test_notify_fails(self):
-        messages = [
-            { 'event_type': 'instance_create',
-              'message_id': 1,
-              'content': dict(a=3) }
-        ]
+        messages = [MockNotification(
+                    {'event_type': 'instance_create',
+                     'message_id': 1,
+                     'content': dict(a=3)})]
         self.called = False
         def mock_request(*args, **kwargs):
             self.called = True

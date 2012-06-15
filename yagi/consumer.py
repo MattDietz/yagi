@@ -11,19 +11,19 @@ class Consumer(object):
         if config:
             self.config = config.get
         else:
-            self.config = yagi.config.config_with('consumer:%s' % queue_name)
+            self.config = yagi.config.config_with("consumer:%s" % queue_name)
         if app:
             self.app = app
         else:
-            apps = [a.strip() for a in self.config('apps').split(',')]
+            apps = [a.strip() for a in self.config("apps").split(",")]
             prev_app = None
             for a in apps:
                 prev_app = yagi.utils.import_class(a)(prev_app,
-                                                      queue_name=self.queue_name)
+                                                    queue_name=self.queue_name)
             self.app = prev_app
 
     def max_messages(self):
-        return int(self.config('max_messages'))
+        return int(self.config("max_messages"))
 
     def connect(self, connection, consumer):
         self.connection = connection
