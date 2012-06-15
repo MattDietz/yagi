@@ -37,18 +37,20 @@ class PubSubHubBubHandler(yagi.handler.BaseHandler):
         topics = {}
         # Compile the list of updated topic urls
         for notification in notifications:
+            payload = notification.payload
             try:
-                event_type = notification['event_type']
+                event_type = payload['event_type']
                 if not event_type in topics:
                     topics[event_type] = self._topic_url(event_type)
             except KeyError, e:
-                LOG.error('Malformed Notification: %s' % notification)
+                LOG.error('Malformed Notification: %s' % payload)
                 LOG.exception(e)
 
         for event_type, topic in topics.iteritems():
             try:
                 LOG.info('Publishing topic %s to %s' % (topic, host))
                 pubsubhubbub_publish.publish(host, topic)
+                notification.ack()
             except pubsubhubbub_publish.PublishError, e:
                 LOG.exception('Publish failed:\n%s' % e)
 
