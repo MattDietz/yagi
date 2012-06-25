@@ -42,10 +42,8 @@ class Consumer(object):
                 payload = message.payload
                 for f in self.filters:
                     payload = f(payload)
-                    print f
-                    print "*"*80
                 yield payload
-                #message.ack()
+                message.ack()
 
         try:
             self.app(next_message)

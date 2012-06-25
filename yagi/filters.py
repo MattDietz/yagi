@@ -11,6 +11,11 @@ class FilterMessageMatch(object):
             if isinstance(message, dict) and message.get(k):
                 if isinstance(v, dict):
                     message[k] = self.transform(v, message[k])
+                elif isinstance(v, list):
+                    for match_dict in v:
+                        if match_dict.get(unicode(message[k])):
+                            message[k] = match_dict[unicode(message[k])]
+                            break
             else:
                 if unicode(k) == message:
                     return v
