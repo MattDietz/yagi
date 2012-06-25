@@ -2,10 +2,10 @@ import functools
 import os
 import sys
 
-
 from contextlib import contextmanager
 from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
+import yagi.filters
 
 CONFIG_FILE = 'yagi.conf'
 CONFIG_PATHS = ['./', '/etc/']
@@ -21,6 +21,8 @@ config_defaults = {'global': {'verbose': 'True',
                                    'port': 8080,
                                    'serializer_driver': 'yagi.serializer.atom',
                                    'feed_title': 'Notifications'}}
+
+filters = {}
 
 
 class DefaultConfigParser(SafeConfigParser):
@@ -66,6 +68,16 @@ def parse_conf(path=None):
     if config_path:
         config.read(config_path)
     return config
+
+
+def get_filter(filter_name):
+    if config.has_section("filter:%s" % filter_name):
+        section = config_with("filter:%s" % filter_name)
+        map_file = section("map_file")
+        method = section("method")
+        kls = getattr(yagi.filters, method)
+        return kls(map_file)
+    raise Exception("No filter named %s" % filter_name)
 
 
 def defaults(section, option, value):
