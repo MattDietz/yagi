@@ -60,14 +60,13 @@ class AtomPub(yagi.handler.BaseHandler):
             raise Exception("Invalid auth or no auth supplied")
         return conn, headers
 
-    def handle_messages(self, notifications):
+    def handle_messages(self, message_generator):
         retries = self.config_get("retries")
         interval = self.config_get("interval")
         max_wait = self.config_get("max_wait")
         conn, headers = self.new_http_connection()
 
-        for notification in notifications:
-            payload = notification.payload
+        for payload in message_generator():
             try:
                 entity = dict(content=payload,
                               id=payload["message_id"],
@@ -89,7 +88,6 @@ class AtomPub(yagi.handler.BaseHandler):
                 try:
                     self._send_notification(endpoint, puburl, headers,
                                             payload_body, conn)
-                    notification.ack()
                     break
                 except MessageDeliveryFailed, e:
                     LOG.exception(e)
@@ -97,12 +95,12 @@ class AtomPub(yagi.handler.BaseHandler):
                     # Re-auth and try again
                     tries += 1
 
-                    # Used primarily for testing, but it's possible we don't care
-                    # if we lose messages?
+                    # Used primarily for testing, but it's possible we don't
+                    # care if we lose messages?
                     if retries and tries == retries:
                         break
                     wait = min(tries*interval, max_wait)
-                    LOG.info("Sleeping, will try again in %d seconds..." % wait)
+                    LOG.info("Sleeping, will try again in %d seconds" % wait)
                     time.sleep(wait)
                     conn, headers = self.new_http_connection(force=True)
                     continue

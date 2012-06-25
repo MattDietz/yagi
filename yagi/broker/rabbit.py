@@ -157,7 +157,8 @@ class Broker(object):
                         except Exception, e:
                             LOG.error("Message decoding failed!")
                             continue
-                    consumer.fetched_messages(messages)
+                    if len(messages) > 0:
+                        consumer.fetched_messages(messages)
                 if poll_delay:
                     time.sleep(poll_delay)
             except socket.error, e:
