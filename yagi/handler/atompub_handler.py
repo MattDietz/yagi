@@ -1,10 +1,9 @@
 import time
 
-import httplib2
-
 import yagi.auth
 import yagi.config
 import yagi.handler
+import yagi.http_util
 import yagi.log
 import yagi.serializer.atom
 
@@ -40,12 +39,20 @@ class AtomPub(yagi.handler.BaseHandler):
                 msg = ("AtomPub resource create failed for %s Status: "
                             "%s, %s" % (puburl, resp.status, content) )
                 raise Exception(msg)
+        except http_util.ResponseTooLargeError, e:
+            if e.response.status == 201:
+                # Was successfully created. Reply was just too large.
+                LOG.error("Response too large on successful post")
+                LOG.exception(e)
+                #Note that we DON'T want to retry this if we've gotten a 201.
+            else:
+                raise
         except Exception, e:
             msg = ("AtomPub Delivery Failed to %s with:\n%s" % (endpoint, e))
             raise MessageDeliveryFailed(msg)
 
     def new_http_connection(force=False):
-        conn = httplib2.Http()
+        conn = http_util.LimitingBodyHttp()
         auth_method = yagi.auth.get_auth_method()
         headers = {}
         if auth_method:
