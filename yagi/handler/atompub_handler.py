@@ -3,9 +3,9 @@ import time
 import yagi.auth
 import yagi.config
 import yagi.handler
-import yagi.http_util
 import yagi.log
 import yagi.serializer.atom
+from yagi import http_util
 
 with yagi.config.defaults_for("atompub") as default:
     default("auth_key", "key")

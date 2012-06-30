@@ -23,10 +23,12 @@ class Consumer(object):
                                                     queue_name=self.queue_name)
             self.app = prev_app
 
-        filters = [f.strip() for f in self.config("filters").split(",")]
-        for f in filters:
-            # Get the filters from the registry
-            self.filters.append(yagi.config.get_filter(f))
+        filter_names = self.config("filters")
+        if filter_names:
+            filters = [f.strip() for f in filter_names.split(",")]
+            for f in filters:
+                # Get the filters from the registry
+                self.filters.append(yagi.config.get_filter(f))
 
     def max_messages(self):
         return int(self.config("max_messages"))
