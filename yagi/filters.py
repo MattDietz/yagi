@@ -44,9 +44,18 @@ class FilterMessageTimestamp(FilterMessage):
                 if isinstance(message[k], dict):
                     self.transform(v, message[k])
                 else:
-                    audit = datetime.datetime.strptime(message[k],
+                    audit = None
+                    # Attempt to read the timestamp two separate ways
+                    try:
+                        audit = datetime.datetime.strptime(message[k],
                                                        '%Y-%m-%d %H:%M:%S')
+                    except:
+                        pass
 
+                    # The only difference here is microseconds. I hate python
+                    if audit is None:
+                        audit = datetime.datetime.strptime(message[k],
+                                                       '%Y-%m-%d %H:%M:%S.%f')
                     delta = datetime.timedelta(hours=int(v))
                     message[k] = str(audit + delta)
         return message
