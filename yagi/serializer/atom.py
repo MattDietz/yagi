@@ -50,10 +50,6 @@ class PagedFeed(feedgenerator.Atom1Feed):
         handler.startElement(u"entry",
                              self.root_attributes() if root else {})
         self.add_item_elements(handler, item)
-        # massage date into pedantic ISO8601
-        if 'timestamp' in item['contents']:
-            day, time  = item['contents']['timestamp'].split()
-            handler.addQuickElement(u'created', "%sT%sZ" % (day, time))
         handler.addQuickElement(u"content",
                 json.dumps(clean_content(item['contents'])),
                 dict(type='application/json'))
