@@ -32,6 +32,7 @@ setup(
                         'argparse',
                         'carrot',
                         'eventlet',
+                        'python-dateutil',
                         'feedgenerator',
                         'httplib2',
                         'PubSubHubbub_Publisher',

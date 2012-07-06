@@ -70,16 +70,6 @@ def parse_conf(path=None):
     return config
 
 
-def get_filter(filter_name):
-    if config.has_section("filter:%s" % filter_name):
-        section = config_with("filter:%s" % filter_name)
-        map_file = section("map_file")
-        method = section("method")
-        kls = getattr(yagi.filters, method)
-        return kls(map_file)
-    raise Exception("No filter named %s" % filter_name)
-
-
 def defaults(section, option, value):
     section_defaults = config_defaults.get(section) or dict()
     section_defaults[option] = str(value)

@@ -15,24 +15,6 @@ class MockResponse(object):
         self.status = status_code
 
 
-class MockNotification(object):
-    def __init__(self, attrs):
-        self.attrs = attrs
-
-    def ack(self):
-        pass
-
-    def __getitem__(self, key):
-        return self.attrs[key]
-
-    def __setitem__(self, key, value):
-        self.attrs[key] = value
-
-    @property
-    def payload(self):
-        return self.attrs
-
-
 class AtomPubTests(unittest.TestCase):
     """Tests to ensure the ATOM Pub code holds together as expected"""
 
@@ -81,29 +63,33 @@ class AtomPubTests(unittest.TestCase):
         self.stubs.UnsetAll()
 
     def test_notify(self):
-        messages = [MockNotification(
-                    {'event_type': 'instance_create',
-                     'message_id': 1,
-                     'content': dict(a=3)})]
+        messages = [{'event_type': 'instance_create',
+                    'message_id': 1,
+                    'content': dict(a=3)}]
+        def gen():
+            return messages
+
         self.called = False
         def mock_request(*args, **kwargs):
             self.called = True
             return MockResponse(201), None
 
         self.stubs.Set(httplib2.Http, 'request', mock_request)
-        self.handler.handle_messages(messages)
+        self.handler.handle_messages(gen)
         self.assertEqual(self.called, True)
 
     def test_notify_fails(self):
-        messages = [MockNotification(
-                    {'event_type': 'instance_create',
+        messages = [{'event_type': 'instance_create',
                      'message_id': 1,
-                     'content': dict(a=3)})]
+                     'content': dict(a=3)}]
         self.called = False
         def mock_request(*args, **kwargs):
             self.called = True
             return MockResponse(404), None
 
+        def gen():
+            return messages
+
         self.stubs.Set(httplib2.Http, 'request', mock_request)
-        self.handler.handle_messages(messages)
+        self.handler.handle_messages(gen)
         self.assertEqual(self.called, True)

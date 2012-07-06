@@ -1,9 +1,11 @@
 import datetime
+import dateutil.parser
 import json
 
 
 class FilterMessage(object):
-    def __init__(self, map_file):
+    def __init__(self, map_file, logger):
+        self.log = logger
         with open(map_file, 'r') as f:
             self.transform_dict = json.load(f)
 
@@ -44,18 +46,12 @@ class FilterMessageTimestamp(FilterMessage):
                 if isinstance(message[k], dict):
                     self.transform(v, message[k])
                 else:
-                    audit = None
-                    # Attempt to read the timestamp two separate ways
                     try:
-                        audit = datetime.datetime.strptime(message[k],
-                                                       '%Y-%m-%d %H:%M:%S')
-                    except:
-                        pass
-
-                    # The only difference here is microseconds. I hate python
-                    if audit is None:
-                        audit = datetime.datetime.strptime(message[k],
-                                                       '%Y-%m-%d %H:%M:%S.%f')
-                    delta = datetime.timedelta(hours=int(v))
-                    message[k] = str(audit + delta)
+                        audit = dateutil.parser.parse(message[k])
+                        delta = datetime.timedelta(hours=int(v))
+                        message[k] = str(audit + delta)
+                    except Exception, e:
+                        # log the exception, but there still could be other
+                        # keys to convert
+                        self.log.exception(e)
         return message

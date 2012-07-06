@@ -1,8 +1,17 @@
 import yagi.config
+import yagi.filters
 import yagi.log
 import yagi.utils
 
 LOG = yagi.log.logger
+
+
+def _get_filter(filter_name):
+    section = yagi.config.config_with("filter:%s" % filter_name)
+    map_file = section("map_file")
+    method = section("method")
+    kls = getattr(yagi.filters, method)
+    return kls(map_file, LOG)
 
 
 class Consumer(object):
@@ -28,7 +37,7 @@ class Consumer(object):
             filters = [f.strip() for f in filter_names.split(",")]
             for f in filters:
                 # Get the filters from the registry
-                self.filters.append(yagi.config.get_filter(f))
+                self.filters.append(_get_filter(f))
 
     def max_messages(self):
         return int(self.config("max_messages"))
