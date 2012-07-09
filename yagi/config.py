@@ -8,7 +8,7 @@ from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 import yagi.filters
 
 CONFIG_FILE = 'yagi.conf'
-CONFIG_PATHS = ['./', '/etc/']
+CONFIG_PATHS = ["/etc/yagi/", "./", "/etc/"]
 
 config = None
 config_path = None
