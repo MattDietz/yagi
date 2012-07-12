@@ -1,4 +1,4 @@
-import json
+import datetime
 import socket
 import time
 
@@ -8,6 +8,9 @@ from carrot.messaging import Consumer
 
 from yagi import config as conf
 import yagi.log
+
+with conf.defaults_for("global") as default:
+    default("update_timer", 300)
 
 with conf.defaults_for("rabbit_broker") as default:
     default("host", "localhost")
@@ -21,10 +24,12 @@ with conf.defaults_for("rabbit_broker") as default:
 
 LOG = yagi.log.logger
 
+
 def confbool(val):
     if val in ("Default", None, "None"):
         return None
     return val == "True" or False
+
 
 class NotQuiteSoStupidConsumer(Consumer):
     """ Carrot is quite broken/braindead in a number of ways.
@@ -77,7 +82,6 @@ class NotQuiteSoStupidConsumer(Consumer):
                                     arguments=arguments)
         self._closed = False
         return self
-
 
 
 class Broker(object):
@@ -136,29 +140,61 @@ class Broker(object):
             consumer.connect(connection, carrot_consumer)
             LOG.info("Connection established for %s" % consumer.queue_name)
         except amqplib.client_0_8.exceptions.AMQPConnectionException, e:
-           LOG.error("Bad parameters for queue %s" % consumer.queue_name)
-           LOG.exception(e)
-           raise e
+            LOG.error("Bad parameters for queue %s" % consumer.queue_name)
+            LOG.exception(e)
+            raise e
 
     def loop(self):
         poll_delay = float(conf.get("rabbit_broker", "poll_delay"))
+        update_timer = int(conf.get("global", "update_timer"))
+        start_time = datetime.datetime.now()
+        messages_sent = {}
         while True:
             try:
                 for consumer in self.consumers:
                     messages = []
+                    if not consumer.queue_name in messages_sent:
+                        messages_sent[consumer.queue_name] = 0
+
                     for n in xrange(consumer.max_messages()):
                         msg = consumer.consumer.fetch(enable_callbacks=False)
                         if not msg:
                             break
-                        try:
-                            LOG.info("Received message on queue %s" %
-                                consumer.queue_name)
-                            messages.append(msg)
-                        except Exception, e:
-                            LOG.error("Message decoding failed!")
-                            continue
-                    if len(messages) > 0:
+                        LOG.debug("Received message on queue %s" %
+                            consumer.queue_name)
+                        messages.append(msg)
+
+                    num_messages = len(messages)
+                    if num_messages > 0:
                         consumer.fetched_messages(messages)
+                        messages_sent[consumer.queue_name] += num_messages
+
+
+                # Ingnoring microseconds because we're not going to let you
+                # be that granular and it's not super useful anyway
+                td = datetime.datetime.now() - start_time
+                elapsed = td.seconds + td.days * 86400
+
+                if elapsed > update_timer:
+                    # This isn't threaded, it's just best effort
+                    LOG.info("Update timer elapsed: %s seconds", str(elapsed))
+                    total_messages = 0
+                    for consumer in self.consumers:
+                        LOG.info("\tSent %d messages from %s" %
+                                          (messages_sent[consumer.queue_name],
+                                           consumer.queue_name))
+                        total_messages += messages_sent[consumer.queue_name]
+                    LOG.info("\tSent %d total messages" % total_messages)
+                    if total_messages > 0:
+                        LOG.info("\tMessages per second: %f" %
+                                    (float(total_messages) / elapsed.seconds))
+
+                    start_time = datetime.datetime.now()
+                    messages_sent = {}
+
+                # This should really only be used when trying to discern bugs
+                # in the flood of messages and coupled with DEBUG logging.
+                # Otherwise, we want Yagi sending as quickly as possible
                 if poll_delay:
                     time.sleep(poll_delay)
             except socket.error, e:

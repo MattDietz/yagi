@@ -13,6 +13,7 @@ with yagi.config.defaults_for('logging') as default:
 FORMAT = "[%(levelname)s at %(asctime)s line: %(lineno)d] "\
          "%(message)s"
 
+
 class YagiLogger(logging.Logger):
     def __init__(self, name, level=None):
         formatter = logging.Formatter(FORMAT)

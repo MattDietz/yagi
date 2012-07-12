@@ -6,7 +6,8 @@ yagi.config.defaults('persistence',
                      'yagi.persistence.devnull.Driver')
 
 
-class InvalidEntityUUID(KeyError): pass
+class InvalidEntityUUID(KeyError):
+    pass
 
 
 def persistence_driver():

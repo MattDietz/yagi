@@ -18,7 +18,8 @@ with yagi.config.defaults_for("atompub") as default:
 LOG = yagi.log.logger
 
 
-class MessageDeliveryFailed(Exception): pass
+class MessageDeliveryFailed(Exception):
+    pass
 
 
 class AtomPub(yagi.handler.BaseHandler):
@@ -29,7 +30,7 @@ class AtomPub(yagi.handler.BaseHandler):
         return url % dict(event_type=key)
 
     def _send_notification(self, endpoint, puburl, headers, body, conn):
-        LOG.info("Sending message to %s with body: %s" % (endpoint, body))
+        LOG.debug("Sending message to %s with body: %s" % (endpoint, body))
         headers = {"Content-Type": "application/atom+xml"}
         try:
             resp, content = conn.request(endpoint, "POST",
@@ -37,7 +38,7 @@ class AtomPub(yagi.handler.BaseHandler):
                                          headers=headers)
             if resp.status != 201:
                 msg = ("AtomPub resource create failed for %s Status: "
-                            "%s, %s" % (puburl, resp.status, content) )
+                            "%s, %s" % (puburl, resp.status, content))
                 raise Exception(msg)
         except http_util.ResponseTooLargeError, e:
             if e.response.status == 201:
@@ -106,9 +107,9 @@ class AtomPub(yagi.handler.BaseHandler):
                     # care if we lose messages?
                     if retries and tries == retries:
                         break
-                    wait = min(tries*interval, max_wait)
-                    LOG.info("Sleeping, will try again in %d seconds" % wait)
+                    wait = min(tries * interval, max_wait)
+                    LOG.warn("Message delivery failed, going to sleep, will "
+                             "try again in %d seconds" % wait)
                     time.sleep(wait)
                     conn, headers = self.new_http_connection(force=True)
                     continue
-

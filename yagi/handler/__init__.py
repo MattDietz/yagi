@@ -25,7 +25,7 @@ class BaseHandler(object):
                 val = method("%s:%s" % (self.CONFIG_SECTION, self.queue_name),
                              key)
             except NoSectionError:
-                pass #nothing here, try elsewhere.
+                pass  # nothing here, try elsewhere.
         if val is None:
             val = method(self.CONFIG_SECTION, key, default=default)
         return val
