@@ -9,7 +9,7 @@ from yagi.persistence import InvalidEntityUUID
 with yagi.config.defaults_for('persistence') as default:
     default('host', 'localhost')
     default('port', 6379)
-    default('entry_ttl', 60*60*24*30)
+    default('entry_ttl', 60 * 60 * 24 * 30)
     default('password', '')
 
 
@@ -25,7 +25,8 @@ class Driver(yagi.persistence.Driver):
 
     def create(self, key, entity_uuid, value):
         if self.ttl <= 0:
-            self.client.set('entry:%s:content' % entity_uuid, json.dumps(value))
+            self.client.set('entry:%s:content' % entity_uuid,
+                            json.dumps(value))
         else:
             self.client.setex('entry:%s:content' % entity_uuid,
                               json.dumps(value),

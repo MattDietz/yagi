@@ -24,13 +24,11 @@ class PubSubHubBubHandler(yagi.handler.BaseHandler):
             scheme = 'http'
         return '%s://%s:%s/%s' % (scheme, host, port, key)
 
-
     def _hub_url(self):
         host = self.config_get('host')
         port = self.config_get('port', default='80')
         scheme = 'https' if self.config_getbool('use_https') else 'http'
         return "%s://%s:%s" % (scheme, host, port)
-
 
     def _notify(self, notifications):
         host = self._hub_url()
@@ -53,5 +51,3 @@ class PubSubHubBubHandler(yagi.handler.BaseHandler):
                 notification.ack()
             except pubsubhubbub_publish.PublishError, e:
                 LOG.exception('Publish failed:\n%s' % e)
-
-
