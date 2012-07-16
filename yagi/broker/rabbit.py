@@ -187,7 +187,7 @@ class Broker(object):
                     LOG.info("\tSent %d total messages" % total_messages)
                     if total_messages > 0:
                         LOG.info("\tMessages per second: %f" %
-                                    (float(total_messages) / elapsed.seconds))
+                                    (float(total_messages) / elapsed))
 
                     start_time = datetime.datetime.now()
                     messages_sent = {}
