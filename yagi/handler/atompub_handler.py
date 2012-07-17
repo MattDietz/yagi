@@ -62,16 +62,16 @@ class AtomPub(yagi.handler.BaseHandler):
             except Exception, e:
                 #Auth is jacked for some reason, slow down on failing
                 LOG.exception(e)
-                interval = self.config_get("interval")
+                interval = int(self.config_get("interval"))
                 time.sleep(interval)
         else:
             raise Exception("Invalid auth or no auth supplied")
         return conn, headers
 
     def handle_messages(self, message_generator):
-        retries = self.config_get("retries")
-        interval = self.config_get("interval")
-        max_wait = self.config_get("max_wait")
+        retries = int(self.config_get("retries"))
+        interval = int(self.config_get("interval"))
+        max_wait = int(self.config_get("max_wait"))
         conn, headers = self.new_http_connection()
 
         for payload in message_generator():
