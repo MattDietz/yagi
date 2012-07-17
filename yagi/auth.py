@@ -30,14 +30,13 @@ class Auth(object):
             return Auth.token
         user = yagi.config.get("handler_auth", "user")
         key = yagi.config.get("handler_auth", "key")
-        tenant = yagi.config.get("handler_auth", "tenant")
         auth_server = yagi.config.get("handler_auth", "auth_server")
-        req = httplib2.Http()
+        req = httplib2.Http(disable_ssl_certificate_validation=True)
         body = {"auth": {
-                    "RAX-KSKEY:apiKeyCredentials": {
+                    "passwordCredentials": {
                         "username": user,
-                        "apiKey": key,
-                        "tenantName": tenant}}}
+                        "password": key,
+                        }}}
         auth_headers = {}
         auth_headers["User-Agent"] = "Yagi"
         auth_headers["Accept"] = "application/json"

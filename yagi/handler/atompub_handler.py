@@ -52,7 +52,7 @@ class AtomPub(yagi.handler.BaseHandler):
             msg = ("AtomPub Delivery Failed to %s with:\n%s" % (endpoint, e))
             raise MessageDeliveryFailed(msg)
 
-    def new_http_connection(force=False):
+    def new_http_connection(self, force=False):
         conn = http_util.LimitingBodyHttp()
         auth_method = yagi.auth.get_auth_method()
         headers = {}
