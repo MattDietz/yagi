@@ -6,6 +6,8 @@ import json
 class FilterMessage(object):
     def __init__(self, map_file, logger):
         self.log = logger
+        self.log.info("Initializing Filter: %s with Map: %s" %
+                (self.__class__.__name__, map_file))
         with open(map_file, 'r') as f:
             self.transform_dict = json.load(f)
 
@@ -55,3 +57,10 @@ class FilterMessageTimestamp(FilterMessage):
                         # keys to convert
                         self.log.exception(e)
         return message
+
+
+def get_filter(filter_name, map_file, logger):
+    if not filter_name in globals():
+        logger.exception("No filter named %s" % filter_name)
+        return None
+    return globals()[filter_name](map_file, logger)

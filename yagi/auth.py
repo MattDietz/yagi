@@ -30,8 +30,10 @@ class Auth(object):
             return Auth.token
         user = yagi.config.get("handler_auth", "user")
         key = yagi.config.get("handler_auth", "key")
+        ssl_check = not bool(yagi.config.get("handler_auth", "validate_ssl",
+                             default=False))
         auth_server = yagi.config.get("handler_auth", "auth_server")
-        req = httplib2.Http(disable_ssl_certificate_validation=True)
+        req = httplib2.Http(disable_ssl_certificate_validation=ssl_check)
         body = {"auth": {
                     "passwordCredentials": {
                         "username": user,
