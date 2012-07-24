@@ -1,7 +1,4 @@
-import fcntl
 import json
-import socket
-import struct
 
 import feedgenerator
 
@@ -79,9 +76,9 @@ def dumps(entities, previous_page=None, next_page=None):
         feed_url=_entity_url(),
         description=title,
         language=u'en',
-        previous_page_url=("%s?page=%s" % (_entity_url(), previous_page)) \
+        previous_page_url=("%s?page=%s" % (_entity_url(), previous_page))
                           if previous_page is not None else None,
-        next_page_url=("%s?page=%s" % (_entity_url(), next_page)) \
+        next_page_url=("%s?page=%s" % (_entity_url(), next_page))
                           if next_page is not None else None)
     for entity in entities:
         event_type = unicode(entity['event_type'])

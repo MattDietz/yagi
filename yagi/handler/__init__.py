@@ -1,4 +1,4 @@
-from ConfigParser import NoOptionError, NoSectionError
+from ConfigParser import NoSectionError
 import yagi.config
 import yagi.log
 

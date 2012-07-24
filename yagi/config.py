@@ -1,11 +1,9 @@
 import functools
 import os
-import sys
 
 from contextlib import contextmanager
 from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
-import yagi.filters
 
 CONFIG_FILE = 'yagi.conf'
 CONFIG_PATHS = ["/etc/yagi/", "./", "/etc/"]

@@ -9,15 +9,20 @@ from yagi import http_util
 
 with yagi.config.defaults_for("atompub") as default:
     default("validate_ssl", "False")
-    default("retries", "0")
+    default("retries", "-1")
     default("url", "http://127.0.0.1/nova")
     default("max_wait", "600")
+    default("failures_before_reauth", "5")
     default("interval", "30")
 
 LOG = yagi.log.logger
 
 
 class MessageDeliveryFailed(Exception):
+    pass
+
+
+class UnauthorizedException(Exception):
     pass
 
 
@@ -31,6 +36,8 @@ class AtomPub(yagi.handler.BaseHandler):
             resp, content = conn.request(endpoint, "POST",
                                          body=body,
                                          headers=headers)
+            if resp.status == 401:
+                raise UnauthorizedException()
             if resp.status != 201:
                 msg = ("AtomPub resource create failed for %s Status: "
                             "%s, %s" % (puburl, resp.status, content))
@@ -38,9 +45,9 @@ class AtomPub(yagi.handler.BaseHandler):
         except http_util.ResponseTooLargeError, e:
             if e.response.status == 201:
                 # Was successfully created. Reply was just too large.
+                # Note that we DON'T want to retry this if we've gotten a 201.
                 LOG.error("Response too large on successful post")
                 LOG.exception(e)
-                # Note that we DON'T want to retry this if we've gotten a 201.
             else:
                 raise
         except Exception, e:
@@ -48,10 +55,9 @@ class AtomPub(yagi.handler.BaseHandler):
             raise MessageDeliveryFailed(msg)
 
     def new_http_connection(self, force=False):
-        ssl_check = not bool(self.config_get("validate_ssl"))
+        ssl_check = not (self.config_get("validate_ssl") == "True")
         conn = http_util.LimitingBodyHttp(
-                            disable_ssl_certificate_validation=ssl_check)
-        conn.follow_all_redirects = True
+                        disable_ssl_certificate_validation=ssl_check)
         auth_method = yagi.auth.get_auth_method()
         headers = {}
         if auth_method:
@@ -72,6 +78,7 @@ class AtomPub(yagi.handler.BaseHandler):
         retries = int(self.config_get("retries"))
         interval = int(self.config_get("interval"))
         max_wait = int(self.config_get("max_wait"))
+        failures_before_reauth = int(self.config_get("failures_before_reauth"))
         conn, headers = self.new_http_connection()
 
         for payload in message_generator():
@@ -87,6 +94,7 @@ class AtomPub(yagi.handler.BaseHandler):
 
             endpoint = self.config_get("url")
             tries = 0
+            failures = 0
             while True:
                 try:
                     self._send_notification(endpoint, endpoint, headers,
@@ -95,17 +103,23 @@ class AtomPub(yagi.handler.BaseHandler):
                 except MessageDeliveryFailed, e:
                     LOG.exception(e)
 
+                    failures += 1
                     # Used primarily for testing, but it's possible we don't
                     # care if we lose messages?
-                    if retries:
+                    if retries > 0:
                         tries += 1
                         if tries >= retries:
                             break
                     wait = min(tries * interval, max_wait)
                     LOG.error("Message delivery failed, going to sleep, will "
-                             "try again in %d seconds" % wait)
+                             "try again in %d seconds" % str(wait))
                     time.sleep(wait)
 
-                    # TODO(cerberus): how did this get isolated? We don't want
-                    # to connect every time
+                    if failures >= failures_before_reauth:
+                        # Don't always try to reconnect, give it a few
+                        # tries first
+                        failures = 0
+                        conn, headers = self.new_http_connection(force=True)
+                except UnauthorizedException:
+                    LOG.exception(e)
                     conn, headers = self.new_http_connection(force=True)

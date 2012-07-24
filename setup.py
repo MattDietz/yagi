@@ -1,6 +1,5 @@
 import os
 from setuptools import setup, find_packages
-from setuptools.command.sdist import sdist
 
 
 def read(fname):

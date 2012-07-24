@@ -1,9 +1,5 @@
-import urlparse
-
 import eventlet
 from eventlet import wsgi
-import routes
-import routes.middleware
 import webob
 import webob.dec
 

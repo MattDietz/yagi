@@ -20,6 +20,7 @@ class LimitingBodyHttp(httplib2.Http):
 
     def __init__(self, max_body_size=1024 * 40, **kw):
         self.max_body_size = max_body_size
+        self.follow_all_redirects = True
         super(LimitingBodyHttp, self).__init__(**kw)
 
     def _conn_request(self, conn, request_uri, method, body, headers):

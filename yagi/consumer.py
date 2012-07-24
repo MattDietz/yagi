@@ -21,7 +21,7 @@ class Consumer(object):
 
         filter_names = self.config("filters")
         if filter_names:
-            filters = [f.strip() for f in filter_names.split(",")]
+            filters = (f.strip() for f in filter_names.split(","))
             for f in filters:
                 section = yagi.config.config_with("filter:%s" % f)
                 map_file = section("map_file")

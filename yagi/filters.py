@@ -51,7 +51,9 @@ class FilterMessageTimestamp(FilterMessage):
                     try:
                         audit = dateutil.parser.parse(message[k])
                         delta = datetime.timedelta(hours=int(v))
-                        message[k] = str(audit + delta)
+                        offset = audit + delta
+
+                        message[k] = offset.strftime("%Y-%m-%dT%H:%M:%S.%f")
                     except Exception, e:
                         # log the exception, but there still could be other
                         # keys to convert

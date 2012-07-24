@@ -1,7 +1,7 @@
+import fcntl
 import socket
+import struct
 import sys
-
-import yagi.config
 
 
 def import_class(klass_str):
@@ -9,7 +9,7 @@ def import_class(klass_str):
     try:
         __import__(module)
         return getattr(sys.modules[module], klass)
-    except (ImportError, ValueError, AttributeError), exc:
+    except (ImportError, ValueError, AttributeError):
         raise Exception("Could not load class %s" % klass_str)
 
 
@@ -17,7 +17,7 @@ def import_module(mod_str):
     try:
         __import__(mod_str)
         return sys.modules[mod_str]
-    except (ImportError, ValueError, AttributeError), exc:
+    except (ImportError, ValueError, AttributeError):
         raise Exception("Could not load module %s" % mod_str)
 
 
@@ -35,6 +35,6 @@ def get_ip_addr():
     for iface in ifaces:
         try:
             return addr_by_iface(iface)
-        except Exception, e:
+        except Exception:
             pass
     return '127.0.0.1'
