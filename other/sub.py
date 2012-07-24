@@ -8,6 +8,7 @@ except ImportError, e:
           "to continue."
     sys.exit(1)
 
+
 def send_subscribe(argv):
     """
     Usage:
@@ -24,8 +25,8 @@ def send_subscribe(argv):
     topic = argv[1]
     callback = argv[2]
     hub = argv[3]
-    form_data = { 
-            'hub.mode': 'subscribe', 
+    form_data = {
+            'hub.mode': 'subscribe',
             'hub.topic': topic,
             'hub.callback': callback,
             'hub.verify': 'sync'

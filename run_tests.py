@@ -2,9 +2,7 @@
 
 import os
 import sys
-import unittest
 
-import daemon
 import nose
 import nose.config
 import nose.core

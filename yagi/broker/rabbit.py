@@ -156,7 +156,7 @@ class Broker(object):
                     if not consumer.queue_name in messages_sent:
                         messages_sent[consumer.queue_name] = 0
 
-                    for n in xrange(consumer.max_messages()):
+                    for n in xrange(consumer.max_messages):
                         msg = consumer.consumer.fetch(enable_callbacks=False)
                         if not msg:
                             break
@@ -168,7 +168,6 @@ class Broker(object):
                     if num_messages > 0:
                         consumer.fetched_messages(messages)
                         messages_sent[consumer.queue_name] += num_messages
-
 
                 # Ingnoring microseconds because we're not going to let you
                 # be that granular and it's not super useful anyway

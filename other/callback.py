@@ -8,6 +8,7 @@ import webob.dec
 
 pool = eventlet.GreenPool()
 
+
 @webob.dec.wsgify
 def callback(req):
     query_string = req.environ.get('QUERY_STRING')
@@ -19,10 +20,6 @@ def callback(req):
     print "Req.environ %s " % req.environ
     print "Req.body %s " % req.body
 
-    
 
 eventlet.wsgi.server(eventlet.listen(('', int(sys.argv[1]))), callback,
         custom_pool=pool)
-
-
-

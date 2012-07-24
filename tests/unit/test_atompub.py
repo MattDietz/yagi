@@ -3,7 +3,6 @@ import unittest
 
 import httplib2
 import stubout
-import webob
 
 import yagi.config
 
@@ -22,12 +21,13 @@ class AtomPubTests(unittest.TestCase):
         self.stubs = stubout.StubOutForTesting()
         config_dict = {
             'atompub': {
-                'url' : 'http://127.0.0.1:9000/test/%(event_type)s',
+                'url': 'http://127.0.0.1:9000/test/%(event_type)s',
                 'user': 'user',
                 'key': 'key',
                 'interval': 30,
                 'max_wait': 600,
-                'retries': 1
+                'retries': 1,
+                'failures_before_reauth': 5
             },
             'event_feed': {
                 'feed_title': 'feed_title',
@@ -66,10 +66,12 @@ class AtomPubTests(unittest.TestCase):
         messages = [{'event_type': 'instance_create',
                     'message_id': 1,
                     'content': dict(a=3)}]
+
         def gen():
             return messages
 
         self.called = False
+
         def mock_request(*args, **kwargs):
             self.called = True
             return MockResponse(201), None
@@ -83,6 +85,7 @@ class AtomPubTests(unittest.TestCase):
                      'message_id': 1,
                      'content': dict(a=3)}]
         self.called = False
+
         def mock_request(*args, **kwargs):
             self.called = True
             return MockResponse(404), None

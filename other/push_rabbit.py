@@ -1,10 +1,7 @@
 import datetime
-import os
 import sys
 import uuid
 
-from carrot import connection as carrot_connection
-from carrot import messaging
 from carrot.connection import BrokerConnection
 from carrot.messaging import Publisher
 
@@ -48,7 +45,6 @@ def make_amqp_conn():
     host = conf('host')
     port = conf('port')
     user = conf('user')
-    exchange = conf('exchange')
     password = conf('password')
     vhost = conf('vhost')
 
@@ -61,10 +57,12 @@ def make_amqp_conn():
     conn = AMQPConnection(**params)
     return conn
 
+
 def delete_queue(queue):
     conn = make_amqp_conn()
     x = conn.get_channel()
     x.queue_delete(queue)
+
 
 def delete_exchange(exch):
     conn = make_amqp_conn()
