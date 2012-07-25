@@ -53,6 +53,26 @@ class FilterMessageTimestamp(FilterMessage):
                         delta = datetime.timedelta(hours=int(v))
                         offset = audit + delta
 
+                        message[k] = offset.strftime("%Y-%m-%d %H:%M:%S.%f")
+                    except Exception, e:
+                        # log the exception, but there still could be other
+                        # keys to convert
+                        self.log.exception(e)
+        return message
+
+
+class FilterMessageTimestampForUsageRetards(FilterMessage):
+    def transform(self, mapping, message):
+        for k, v in mapping.iteritems():
+            if isinstance(message, dict) and message.get(k):
+                if isinstance(message[k], dict):
+                    self.transform(v, message[k])
+                else:
+                    try:
+                        audit = dateutil.parser.parse(message[k])
+                        delta = datetime.timedelta(hours=int(v))
+                        offset = audit + delta
+
                         message[k] = offset.strftime("%Y-%m-%dT%H:%M:%S.%f")
                     except Exception, e:
                         # log the exception, but there still could be other
