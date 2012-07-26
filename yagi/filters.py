@@ -57,6 +57,8 @@ class FilterMessageTimestamp(FilterMessage):
                     except Exception, e:
                         # log the exception, but there still could be other
                         # keys to convert
+                        self.log.error("Bad timestamp in message: %s" %
+                                                message[k])
                         self.log.exception(e)
         return message
 
@@ -77,6 +79,8 @@ class FilterMessageTimestampForUsageRetards(FilterMessage):
                     except Exception, e:
                         # log the exception, but there still could be other
                         # keys to convert
+                        self.log.error("Bad timestamp in message: %s" %
+                                                message[k])
                         self.log.exception(e)
         return message
 
