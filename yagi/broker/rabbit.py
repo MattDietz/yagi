@@ -198,6 +198,11 @@ class Broker(object):
                     time.sleep(poll_delay)
             except socket.error, e:
                 LOG.critical("Rabbit connection lost, reconnecting")
+                LOG.exception(e)
+                self.establish_consumer_connection(consumer)
+            except aclient_0_8.exceptions.AMQPException, e:
+                LOG.critical("Rabbit connection lost, reconnecting")
+                LOG.exception(e)
                 self.establish_consumer_connection(consumer)
             except Exception, e:
                 LOG.exception(e)
