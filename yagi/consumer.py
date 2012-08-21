@@ -1,6 +1,9 @@
+import time
+
 import yagi.config
 import yagi.filters
 import yagi.log
+import yagi.stats
 import yagi.utils
 
 LOG = yagi.log.logger
@@ -48,7 +51,13 @@ class Consumer(object):
                 message.ack()
 
         try:
+            start_time = time.time()
             self.app(next_message)
+            yagi.stats.time_stat(yagi.config.get("stats", "elapsed"),
+                                 time.time() - start_time)
         except Exception, e:
             # If we get all the way back out here, that's bad juju
             LOG.exception("Error in fetched_messages: \n%s" % e)
+
+        yagi.stats.increment_stat(yagi.config.get("stats", "messages_sent"),
+                                  len(messages))

@@ -5,6 +5,7 @@ import yagi.config
 import yagi.handler
 import yagi.log
 import yagi.serializer.atom
+from yagi import stats
 from yagi import http_util
 
 with yagi.config.defaults_for("atompub") as default:
@@ -101,6 +102,8 @@ class AtomPub(yagi.handler.BaseHandler):
                                             payload_body, conn)
                     break
                 except MessageDeliveryFailed, e:
+                    stats.increment_stat(
+                            yagi.config.get("stats", "failure"))
                     LOG.exception(e)
 
                     failures += 1
