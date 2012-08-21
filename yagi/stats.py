@@ -16,7 +16,7 @@ LOG = yagi.log.logger
 def _statsd_ping(data):
     enabled = yagi.config.get("stats", "enabled")
     LOG.debug("Sending stat: %s" % data)
-    if enabled.lower() == "True":
+    if enabled.lower() == "true":
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         conf = yagi.config.config_with("stats")
         host = conf("host")
