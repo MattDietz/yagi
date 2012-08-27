@@ -1,5 +1,3 @@
-import daemon
-
 import yagi.commandline
 from yagi.consumer import Consumer
 import yagi.event_worker
@@ -23,6 +21,7 @@ def setup_consumers():
 
 def start_consumers():
     if yagi.config.get('event_worker', 'daemonize') == 'True':
+        import daemon
         context = daemon.DaemonContext()
         LOG.info('Starting Event Worker daemon')
         context.pidfile = yagi.config.get('event_worker', 'pidfile')
