@@ -100,6 +100,11 @@ def get(*args, **kwargs):
 
 
 @lazy_load_config
+def has_section(*args):
+    return config.has_section(*args)
+
+
+@lazy_load_config
 def get_bool(*args, **kwargs):
     return config.getboolean(*args)
 

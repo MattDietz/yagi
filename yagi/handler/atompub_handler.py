@@ -102,11 +102,15 @@ class AtomPub(yagi.handler.BaseHandler):
                                             payload_body, conn)
                     break
                 except MessageDeliveryFailed, e:
-                    stats.increment_stat(
-                            yagi.config.get("stats", "failure"))
+                    stats.increment_stat(yagi.stats.failure_message())
                     LOG.exception(e)
 
+                    # Number of overall tries
+                    tries += 1
+
+                    # Number of tries between re-auth attempts
                     failures += 1
+
                     # Used primarily for testing, but it's possible we don't
                     # care if we lose messages?
                     if retries > 0:
@@ -115,7 +119,7 @@ class AtomPub(yagi.handler.BaseHandler):
                             break
                     wait = min(tries * interval, max_wait)
                     LOG.error("Message delivery failed, going to sleep, will "
-                             "try again in %d seconds" % str(wait))
+                             "try again in %s seconds" % str(wait))
                     time.sleep(wait)
 
                     if failures >= failures_before_reauth:
